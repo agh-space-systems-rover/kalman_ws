@@ -19,6 +19,16 @@ In order to upgrade the simulation to a newer version, please launch it using Un
 
 ## Getting Started
 
+Firstly clone the repository on your machine:
+```bash
+git clone --recurse-submodules git@github.com:agh-space-systems-rover/kalman.git
+```
+
+If you have already cloned without `--recurse-submodules`, use:
+```bash
+git submodule update --init --recursive
+```
+
 To enter the accelerated ROS 2 shell, run this automated script:
 ```bash
 ./scripts/distrobox

@@ -4,8 +4,19 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 ws_dir="$(cd "$script_dir/.." && pwd)"
 distrobox_home="$ws_dir/.distrobox"
 
-# Check if Distrobox instance exists.
+# Check if Distrobox home doesn't exist.
+# This is much faster than checking if the Distrobox instance exists.
 if [[ ! -d $distrobox_home ]]; then
+    # Check if Distrobox instance exists.
+    if [[ $(distrobox list --no-color | grep "kalman:ros2" | wc -l) -ne 0 ]]; then
+        # Remove the Distrobox.
+        echo "Removing existing Distrobox..."
+        # Make the home directory so that distrobox rm doesn't complain.
+        mkdir -p $distrobox_home
+        distrobox stop --yes kalman
+        distrobox rm --force --rm-home kalman
+    fi
+
     # Check if Docker image exists.
     if [[ "$(docker images -q kalman:ros2 2> /dev/null)" == "" ]]; then
         echo "Building Docker image..."
