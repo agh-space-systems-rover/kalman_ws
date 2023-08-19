@@ -1,0 +1,10 @@
+# Distrobox home directory
+/.distrobox
+
+# Visual Studio Code configuration
+/.vscode
+
+# ROS 2 build and runtime artifacts
+/build
+/install
+/log

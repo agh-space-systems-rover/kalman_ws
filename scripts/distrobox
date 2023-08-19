@@ -1,0 +1,42 @@
+#!/usr/bin/bash
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+ws_dir="$(cd "$script_dir/.." && pwd)"
+distrobox_home="$ws_dir/.distrobox"
+
+# Check if Distrobox instance exists.
+if [[ ! -d $distrobox_home ]]; then
+    # Check if Docker image exists.
+    if [[ "$(docker images -q kalman:ros2 2> /dev/null)" == "" ]]; then
+        echo "Building Docker image..."
+
+        # Build the Docker image
+        # DOCKER_BUILDKIT=1 is required to suppress deprecation warnings.
+        DOCKER_BUILDKIT=1 docker build --tag kalman:ros2 $script_dir
+        if [[ $? -ne 0 ]]; then
+            echo "Failed to build Docker image."
+            exit 1
+        fi
+    fi
+
+    echo "Creating Distrobox instance..."
+    
+    # Suppress Ubuntu sudo babysitting.
+    mkdir -p $distrobox_home
+    touch $distrobox_home/.sudo_as_admin_successful
+
+    # Link up user Git config and SSH keys.
+    ln -s $HOME/.gitconfig $distrobox_home/.gitconfig
+    ln -s $HOME/.ssh $distrobox_home/.ssh
+
+    # Create the Distrobox.
+    distrobox create --image kalman:ros2 --name kalman --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --nvidia --no-entry
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to create Distrobox instance."
+        exit 1
+    fi
+fi
+
+# Enter the Distrobox using a custom shell entrypoint which will
+# ensure that the login script is always sourced in .bashrc.
+distrobox enter kalman -- sh -c "DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC=$ws_dir bash --rcfile $script_dir/.bashrc"

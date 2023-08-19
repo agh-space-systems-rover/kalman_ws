@@ -1,0 +1,4 @@
+#!/usr/bin/sh
+
+distrobox stop --yes kalman
+distrobox rm --force --rm-home kalman
