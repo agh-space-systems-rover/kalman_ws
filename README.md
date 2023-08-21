@@ -33,17 +33,23 @@ To enter the accelerated ROS 2 shell, run this automated script:
 ```bash
 ./scripts/distrobox
 ```
+
+After the initial setup of your container is done, you will need to build the workspace:
+```bash
+build
+```
+
 Then, a new Bash shell will pop up. Execute the following command to launch the simulation:
 ```bash
-ros2 run unity_sim start
+ros2 run unity_sim simulation
 ```
 
 ## Custom Macros
 
-- `build` - Build the workspace and then source its setup script. Additionally, Visual Studio Code is automatically configured for ease of use.
-- `clean` - Remove build artifacts in the workspace.
-- `pull` - Automatically pull latest changes in all repositories.
-- `push` - For each repo automatically commit changes/create branches and push them to the origin.
+- `build` - Pull from rosdep and build the workspace, then source its setup script. Additionally, Visual Studio Code is automatically configured for ease of use.
+- `clean` - Remove build artifacts from the workspace.
+- `pull` - Automatically pull latest changes in all repositories. (TODO: Untested)
+- `push` - For each repo automatically commit changes/create branches and push them to the origin. (TODO: Untested)
 
 See: [macros.bash](/scripts/macros.bash)
 

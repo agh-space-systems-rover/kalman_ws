@@ -22,7 +22,9 @@ setup(
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
-            'my_node = my_package.my_node:main'
+            'my_node = my_package.my_node:main',
+            "my_subscriber = my_package.my_subscriber:main",
+            "my_publisher = my_package.my_publisher:main",
         ],
     },
 )

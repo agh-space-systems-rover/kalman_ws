@@ -5,12 +5,14 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='my_package',
-            executable='my_node',
-            name='my_node'
+            executable='my_node'
         ),
         Node(
-            package='unity_sim',
-            executable='unity_sim',
-            name='unity_sim'
+            package='my_package',
+            executable='my_publisher',
         ),
+        Node(
+            package='my_package',
+            executable='my_subscriber',
+        )
     ])
