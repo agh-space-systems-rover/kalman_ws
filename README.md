@@ -118,3 +118,7 @@ colcon graph --dot | dot -Tpng -o deps.png
 ROS 2 logs can be found in `.ros/log`
 
 Example package is located in `src/my_package`.
+
+TODO: Auto-install all */requiremets.txt found in src (up to depth = 3?)
+TODO: Add ~/.local/**/site-packages to VSCode paths
+TODO: Add /usr/**/site-packages to VSCode paths

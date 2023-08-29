@@ -14,7 +14,6 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob.glob(os.path.join('launch', '*launch.[pxy][yma]*')))
     ],
-    install_requires=[],
     zip_safe=True,
     maintainer='rayferric',
     maintainer_email='63957587+rayferric@users.noreply.github.com',

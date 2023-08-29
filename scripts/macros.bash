@@ -46,8 +46,9 @@ clean() {
     rm -rf $_KALMAN_WS_ROOT/install
     rm -rf $_KALMAN_WS_ROOT/log
 
-    # Remove paths from $AMENT_PREFIX_PATH
+    # Remove paths from $AMENT_PREFIX_PATH and $CMAKE_PREFIX_PATH.
     AMENT_PREFIX_PATH=/opt/ros/$ROS_DISTRO
+    unset CMAKE_PREFIX_PATH
 }
 
 # Downloads non-existing repositories using VCS.
