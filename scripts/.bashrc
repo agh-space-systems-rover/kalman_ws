@@ -8,6 +8,9 @@ source $HOME/.bashrc
 if [ ! -z "$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC" ]; then
     # Ensure that host-spawn is properly installed.
     distrobox-host-exec --yes cat /dev/null
+    
+    # Fix-up SHELL variable passed from the host.
+    export SHELL=/usr/bin/bash
 
     # Extract the workspace root from the marker variable.
     _KALMAN_WS_ROOT=$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC

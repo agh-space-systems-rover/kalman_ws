@@ -57,20 +57,23 @@ pull() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-     # Find all repositories.
-    REPOS=$(find . -type d -name .git -execdir pwd \;)
+    # Find all repositories.
+    # REPOS=$(find ./src/ -name .git -execdir pwd \;)
 
     # Pull all repositories.
-    for REPO in $REPOS; do
-        cd $REPO
-        git pull
-        if [ $? -ne 0 ]; then
-            echo "Failed to pull $REPO."
-            cd $prev_dir
-            unset prev_dir
-            return
-        fi
-    done
+    # for REPO in $REPOS; do
+    #     cd $REPO
+    #     git pull
+    #     if [ $? -ne 0 ]; then
+    #         echo "Failed to pull $REPO."
+    #         cd $prev_dir
+    #         unset prev_dir
+    #         return
+    #     fi
+    # done
+
+    # Do the same in parallel.
+    find ./src/ -name .git -execdir pwd \; | xargs -n 1 -P 8 -I {} git -C {} pull
 
     cd $prev_dir
     unset prev_dir
