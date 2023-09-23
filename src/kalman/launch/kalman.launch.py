@@ -84,6 +84,17 @@ def generate_launch_description():
                 }.items(),
                 condition=UnlessCondition(LaunchConfiguration("simulation")),
             ),
+            # Launch simulator and bridge if simulation is enabled.
+            Node(
+                package="unity_sim",
+                executable="simulation",
+                condition=IfCondition(LaunchConfiguration("simulation")),
+            ),
+            Node(
+                package="rosbridge_server",
+                executable="rosbridge_websocket",
+                condition=IfCondition(LaunchConfiguration("simulation")),
+            ),
             # TODO: Add the other two cameras.
             # front PC converter
             # Node(
