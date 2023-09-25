@@ -8,3 +8,6 @@
 /build
 /install
 /log
+/frames_*.gv
+/frames_*.pdf
+/robot_localization_debug.txt

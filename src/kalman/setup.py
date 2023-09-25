@@ -16,8 +16,8 @@ setup(
             glob.glob(os.path.join("launch", "*launch.[pxy][yma]*")),
         ),
         (
-            "share/" + package_name + "/urdf",
-            glob.glob(os.path.join("urdf", "*.xacro")),
+            "share/" + package_name + "/config",
+            glob.glob(os.path.join("config", "*")),
         ),
     ],
     zip_safe=True,
