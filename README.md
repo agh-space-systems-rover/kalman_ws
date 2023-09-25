@@ -41,7 +41,7 @@ build
 
 Then, a new Bash shell will pop up. Execute the following command to launch the simulation:
 ```bash
-ros2 run unity_sim simulation
+ros2 launch kalman kalman.launch.py simulation:=true
 ```
 
 ## Custom Macros
