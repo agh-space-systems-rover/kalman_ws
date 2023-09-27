@@ -63,6 +63,39 @@ def generate_launch_description():
                     str(get_package_share_path("kalman") / "config" / "ukf.yaml")
                 ],
             ),
+            # IncludeLaunchDescription(
+            #     PythonLaunchDescriptionSource(
+            #         str(
+            #             get_package_share_path("rtabmap_launch")
+            #             / "launch"
+            #             / "rtabmap.launch.py"
+            #         )
+            #     ),
+            #     # <param name="subscribe_rgbd" type="bool"   value="true"/>
+            #     # <param name="frame_id"       type="string" value="base_link"/>
+            #     # <remap from="rgbd_image" to="/$(arg camera)/rgbd_image"/>
+            #     # <remap from="odom" to="$(arg camera)/odom"/>
+            #     # <param name="publish_tf" value="false"/>
+            #     launch_arguments={
+            #         "localization": "true",
+            #         # "rtabmapviz": "false",
+            #         "publish_tf_map": "false",
+            #         "namespace": "d455_front",
+            #         "rtabmap_args": "--delete_db_on_start",
+            #         # "initial_pose": "0 0 0 0 0 0",
+            #         "rgb_topic": "/d455_front/color/image_raw",
+            #         # "depth_topic": "/d455_front/aligned_depth_to_color/image_raw",
+            #         # "subscribe_rgbd": "true",
+            #         # "subscribe_scan_cloud": "true",
+            #         # "scan_cloud_topic": "/d455_front/depth/color/points",
+            #         "visual_odometry": "true",
+            #         # "icp_odometry": "true",
+            #         # "odom_topic": "/d455_front/odom",
+            #         "publish_tf_odom": "false",
+            #         "depth": "false",
+            #         "subscribe_rgb": "false",
+            #     }.items(),
+            # ),
             # ---------------------------
             # real-life RealSense drivers
             # ---------------------------
@@ -101,16 +134,14 @@ def generate_launch_description():
             # -----------------------
             # Unity simulation + RViz
             # -----------------------
-            Node(
-                name="unity_sim",
-                package="unity_sim",
-                executable="simulation",
-                condition=IfCondition(LaunchConfiguration("simulation")),
-            ),
-            Node(
-                name="rosbridge",
-                package="rosbridge_server",
-                executable="rosbridge_websocket",
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(
+                        get_package_share_path("unity_sim")
+                        / "launch"
+                        / "unity_sim.launch.py"
+                    )
+                ),
                 condition=IfCondition(LaunchConfiguration("simulation")),
             ),
             Node(

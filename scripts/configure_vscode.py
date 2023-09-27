@@ -2,16 +2,33 @@
 
 import os, shutil, json, glob
 
+
+def copy_if_updated(from_dir: str, to_dir: str):
+    if os.path.isdir(to_dir):
+        from_dir_mtime = os.path.getmtime(from_dir)
+        to_dir_mtime = os.path.getmtime(to_dir)
+        if from_dir_mtime > to_dir_mtime:
+            shutil.rmtree(to_dir)
+            shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
+    else:
+        shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
+
+
 ws_dir = os.path.normpath(os.path.dirname(__file__) + "/..")
 config_path = os.path.join(ws_dir, ".vscode/settings.json")
-site_dir = os.path.expanduser("~/.vscode-ros2-site-packages")
-dist_dir = os.path.expanduser("~/.vscode-ros2-dist-packages")
+site_dir = os.path.expanduser("~/.vscode-paths/ros2-site-packages")
+dist_dir = os.path.expanduser("~/.vscode-paths/ros2-dist-packages")
+include_dir = os.path.expanduser("~/.vscode-paths/ros2-include")
+usr_include_dir = os.path.expanduser("~/.vscode-paths/usr-include")
 
 # If needed, copy ROS 2 site-packages and dist-packages to ~ for auto-complete on the host.
-shutil.copytree(glob.glob("/opt/ros/*/lib/python*/site-packages")[0], site_dir, dirs_exist_ok=True)
-shutil.copytree(glob.glob("/opt/ros/*/local/lib/python*/dist-packages")[0], dist_dir, dirs_exist_ok=True)
+copy_if_updated(glob.glob("/opt/ros/*/lib/python*/site-packages")[0], site_dir)
+copy_if_updated(glob.glob("/opt/ros/*/local/lib/python*/dist-packages")[0], dist_dir)
+# Also copy C++ headers.
+copy_if_updated(glob.glob("/opt/ros/*/include")[0], include_dir)
+copy_if_updated("/usr/include", usr_include_dir)
 
-# Load the configuration file.
+# Load the configuration files.
 if os.path.isfile(config_path):
     with open(config_path) as f:
         config = json.load(f)
@@ -22,20 +39,17 @@ else:
 running_distrobox = "DISTROBOX_HOST_HOME" in os.environ
 if running_distrobox:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman": {
-            "path": f"{ws_dir}/scripts/distrobox"
-        }
+        "kalman": {"path": f"{ws_dir}/scripts/distrobox"}
     }
 else:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman": {
-            "path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/.bashrc"
-        }
+        "kalman": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/.bashrc"}
     }
 config["terminal.integrated.defaultProfile.linux"] = "kalman"
 
 # Reset paths.
 config["python.autoComplete.extraPaths"] = [site_dir, dist_dir]
+config["C_Cpp.default.includePath"] = [include_dir + "/**", usr_include_dir + "/**"]
 
 # Find the install directory.
 install_dir = os.path.join(ws_dir, "install")
@@ -47,7 +61,9 @@ if os.path.isdir(install_dir):
         if os.path.isdir(item_dir):
             # ...then it is a package.
             # Add the package to the configuration.
-            for site_packages_dir in glob.glob(os.path.join(item_dir, "lib", "python*", "site-packages")):
+            for site_packages_dir in glob.glob(
+                os.path.join(item_dir, "lib", "python*", "site-packages")
+            ):
                 config["python.autoComplete.extraPaths"].append(site_packages_dir)
 
 # Sort the paths.
