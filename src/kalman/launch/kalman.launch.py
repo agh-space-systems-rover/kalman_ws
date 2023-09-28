@@ -21,24 +21,20 @@ def generate_launch_description():
             # launch arguments
             # ----------------
             DeclareLaunchArgument(
+                "unity_sim",
+                default_value="False",
+                description="Start up the Unity simulator with virtual sensors and actuators.",
+            ),
+            DeclareLaunchArgument(
                 "physical_drivers",
                 default_value="False",
                 description="Launch with physical sensors and actuators.",
             ),
-            DeclareLaunchArgument(
-                "simulation",
-                default_value="False",
-                description="Start up the simulator and RViz.",
-            ),
+            # (those two args should never be set simultaneously)
             # -------
             # commons
             # -------
-            Node(
-                name="map_to_odom",
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
-            ),
+            # robot structure TF publisher
             Node(
                 name="state_publisher",
                 package="robot_state_publisher",
@@ -55,14 +51,20 @@ def generate_launch_description():
                     }
                 ],
             ),
+            # static map->odom transform
             Node(
-                name="ukf",
-                package="robot_localization",
-                executable="ukf_node",
-                parameters=[
-                    str(get_package_share_path("kalman") / "config" / "ukf.yaml")
-                ],
+                name="map_to_odom",
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
             ),
+            # # static odom->base_link for testing
+            # Node(
+            #     name="odom_to_base_link",
+            #     package="tf2_ros",
+            #     executable="static_transform_publisher",
+            #     arguments=["0", "0", "0", "0", "0", "0", "odom", "base_link"],
+            # ),
             # IncludeLaunchDescription(
             #     PythonLaunchDescriptionSource(
             #         str(
@@ -77,73 +79,61 @@ def generate_launch_description():
             #     # <remap from="odom" to="$(arg camera)/odom"/>
             #     # <param name="publish_tf" value="false"/>
             #     launch_arguments={
+            #         "cfg": str(
+            #             get_package_share_path("kalman") / "config" / "rtabmap.ini"
+            #         ),
             #         "localization": "true",
-            #         # "rtabmapviz": "false",
-            #         "publish_tf_map": "false",
-            #         "namespace": "d455_front",
-            #         "rtabmap_args": "--delete_db_on_start",
+            #         "rtabmapviz": "false",
+            #         "publish_tf_map": "true",
+            #         # "namespace": "d455_front",
+            #         "args": "--delete_db_on_start",
             #         # "initial_pose": "0 0 0 0 0 0",
+            #         "approx_sync": "true",
             #         "rgb_topic": "/d455_front/color/image_raw",
-            #         # "depth_topic": "/d455_front/aligned_depth_to_color/image_raw",
+            #         "depth_topic": "/d455_front/aligned_depth_to_color/image_raw",
+            #         "camera_info_topic": "/d455_front/color/camera_info",
             #         # "subscribe_rgbd": "true",
             #         # "subscribe_scan_cloud": "true",
             #         # "scan_cloud_topic": "/d455_front/depth/color/points",
-            #         "visual_odometry": "true",
+            #         # "visual_odometry": "true",
             #         # "icp_odometry": "true",
             #         # "odom_topic": "/d455_front/odom",
-            #         "publish_tf_odom": "false",
-            #         "depth": "false",
-            #         "subscribe_rgb": "false",
+            #         "publish_tf_odom": "true",
+            #         "imu_topic": "/imu/data",
+            #         "wait_imu_to_init": "true",
+            #         # "depth": "false",
+            #         # "subscribe_rgb": "false",
+            #         # "rviz": "true",
             #     }.items(),
             # ),
-            # ---------------------------
-            # real-life RealSense drivers
-            # ---------------------------
-            # Those nodes facilitate the communication with the RealSense devices
-            # and publish data to ROS topics.
+        ]
+        + [
+            # visual odometry
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     str(
-                        get_package_share_path("realsense2_camera")
+                        get_package_share_path("kalman")
                         / "launch"
-                        / "rs_launch.py"
+                        / "rgbd_odom.launch.py"
                     )
                 ),
                 launch_arguments={
-                    "camera_name": "d455_front",
-                    "serial_no": "_043422251512",
-                    "pointcloud.enable": "true",
+                    "camera_id": camera_id,
                 }.items(),
-                condition=IfCondition(LaunchConfiguration("physical_drivers")),
+            )
+            for camera_id in ["d455_front", "d455_back", "d455_left", "d455_right"]
+        ]
+        + [
+            # Kalman filter
+            Node(
+                name="ukf",
+                package="robot_localization",
+                executable="ukf_node",
+                parameters=[
+                    str(get_package_share_path("kalman") / "config" / "ukf.yaml")
+                ],
             ),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    str(
-                        get_package_share_path("realsense2_camera")
-                        / "launch"
-                        / "rs_launch.py"
-                    )
-                ),
-                launch_arguments={
-                    "camera_name": "d455_right",
-                    "serial_no": "_231122300896",
-                    "pointcloud.enable": "true",
-                }.items(),
-                condition=IfCondition(LaunchConfiguration("physical_drivers")),
-            ),
-            # -----------------------
-            # Unity simulation + RViz
-            # -----------------------
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    str(
-                        get_package_share_path("unity_sim")
-                        / "launch"
-                        / "unity_sim.launch.py"
-                    )
-                ),
-                condition=IfCondition(LaunchConfiguration("simulation")),
-            ),
+            # RViz in dev mode
             Node(
                 name="rviz",
                 package="rviz2",
@@ -152,7 +142,29 @@ def generate_launch_description():
                     "-d",
                     str(get_package_share_path("kalman") / "config" / "default.rviz"),
                 ],
-                condition=IfCondition(LaunchConfiguration("simulation")),
+            ),
+            # -----------------------------------
+            # Unity simulation + physical drivers
+            # -----------------------------------
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(
+                        get_package_share_path("unity_sim")
+                        / "launch"
+                        / "unity_sim.launch.py"
+                    )
+                ),
+                condition=IfCondition(LaunchConfiguration("unity_sim")),
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(
+                        get_package_share_path("kalman")
+                        / "launch"
+                        / "physical_drivers.launch.py"
+                    )
+                ),
+                condition=IfCondition(LaunchConfiguration("physical_drivers")),
             ),
         ]
     )

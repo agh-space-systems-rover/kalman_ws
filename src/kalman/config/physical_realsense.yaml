@@ -1,0 +1,7 @@
+decimation_filter:
+  enable: true
+  filter_magnitude: 6
+pointcloud:
+  enable: true
+align_depth:
+  enable: true
