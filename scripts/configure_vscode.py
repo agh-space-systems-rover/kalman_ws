@@ -1,5 +1,8 @@
 # Configure auto-complete, code analysis and terminal for VS Code.
 
+# TODO: Add ~/.local/**/site-packages to VSCode paths
+# TODO: Add /usr/**/site-packages to VSCode paths
+
 import os, shutil, json, glob
 
 
