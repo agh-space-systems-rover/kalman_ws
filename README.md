@@ -2,6 +2,8 @@
 
 ROS 2 development environment for the Kalman rover
 
+![](./docs/cover.png)
+
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) + [BuildX](https://github.com/docker/buildx)
