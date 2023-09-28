@@ -1,5 +1,3 @@
-# Panik
-
 kalm() {
     cmd=$1
     if [[ $cmd == "buld" ]]; then
