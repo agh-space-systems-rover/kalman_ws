@@ -65,6 +65,8 @@ if os.path.isdir(install_dir):
                 os.path.join(item_dir, "lib", "python*", "site-packages")
             ):
                 config["python.autoComplete.extraPaths"].append(site_packages_dir)
+            for include_dir in glob.glob(os.path.join(item_dir, "include")):
+                config["C_Cpp.default.includePath"].append(include_dir + "/**")
 
 # Sort the paths.
 config["python.autoComplete.extraPaths"].sort()
