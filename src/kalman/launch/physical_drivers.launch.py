@@ -3,7 +3,6 @@ from launch import LaunchDescription
 
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
@@ -31,7 +30,6 @@ def generate_launch_description():
                         / "physical_realsense.yaml"
                     ),
                 }.items(),
-                condition=IfCondition(LaunchConfiguration("physical_drivers")),
             )
             for camera_name, serial_no in [("d455_front", "_043422251512")]
         ]

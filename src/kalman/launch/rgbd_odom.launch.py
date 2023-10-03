@@ -14,17 +14,16 @@ def launch_setup(context):
             executable="rgbd_odometry",
             parameters=[
                 {
-                    "config_path": str(
-                        get_package_share_path("kalman") / "config" / "rtabmap.ini"
-                    ),
                     "frame_id": "base_link",
                     "publish_tf": False,
                     "subscribe_rgbd": True,
+                    "Odom/ResetCountdown": "1",
                 }
             ],
             remappings={
                 "rgbd_image": f"/{LaunchConfiguration('camera_id').perform(context)}/rgbd_sync/rgbd_image"
             }.items(),
+            arguments=["--ros-args", "--log-level", "warn"],
         ),
         Node(
             namespace=f"{LaunchConfiguration('camera_id').perform(context)}/rgbd_sync",

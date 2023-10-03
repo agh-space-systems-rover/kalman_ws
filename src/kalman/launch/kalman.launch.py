@@ -143,6 +143,54 @@ def generate_launch_description():
                     str(get_package_share_path("kalman") / "config" / "default.rviz"),
                 ],
             ),
+            # RTAB-Map SLAM
+            # Node(
+            #     namespace=f"/slam",
+            #     package="rtabmap_slam",
+            #     executable="rtabmap",
+            #     parameters=[
+            #         {
+            #             "subscribe_depth": False,
+            #             "subscribe_rgbd": False,
+            #             "subscribe_rgb": False,
+            #             "subscribe_stereo": False,
+            #             "subscribe_scan": False,
+            #             "subscribe_scan_cloud": True,
+            #             "subscribe_user_data": False,
+            #             "subscribe_odom_info": False,
+            #             "frame_id": "base_link",
+            #             "map_frame_id": "map",
+            #             "odom_frame_id": "odom",
+            #             "publish_tf": True,
+            #             "approx_sync": False,
+            #             "queue_size": 40,
+            #         }
+            #     ],
+            #     remappings={"scan_cloud": f"/d455_front/depth/color/points"}.items(),
+            # ),
+            # IncludeLaunchDescription(
+            #     PythonLaunchDescriptionSource(
+            #         str(
+            #             get_package_share_path("rtabmap_launch")
+            #             / "launch"
+            #             / "rtabmap.launch.py"
+            #         )
+            #     ),
+            #     launch_arguments={
+            #         "localization": "false",
+            #         "odom_topic": "/odometry/filtered",
+            #         "visual_odometry": "false",
+            #         "publish_tf_map": "false",
+            #         "publish_tf_odom": "false",
+            #         # "subscribe_rgbd": False,
+            #         "rgb_topic": "/d455_front/color/image_raw",
+            #         "depth_topic": "/d455_front/aligned_depth_to_color/image_raw",
+            #         "camera_info_topic": "/d455_front/color/camera_info",
+            #         "approx_sync": "true",
+            #         "rviz": "true",
+            #         "args": "--delete_db_on_start",
+            #     }.items(),
+            # ),
             # -----------------------------------
             # Unity simulation + physical drivers
             # -----------------------------------

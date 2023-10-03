@@ -1,3 +1,5 @@
+# Common configuration of realsense2_camera nodes.
+
 decimation_filter:
   enable: true
   filter_magnitude: 6

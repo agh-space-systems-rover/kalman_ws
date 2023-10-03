@@ -6,8 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Imu1/Acceleration properties1
-      Splitter Ratio: 0.5
+        - /TF1
+        - /TF1/Frames1
+        - /Imu1
+        - /PoseWithCovariance1
+      Splitter Ratio: 0.7558823823928833
     Tree Height: 707
   - Class: rviz_common/Selection
     Name: Selection
@@ -52,131 +55,133 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
+        altimeter_link:
+          Value: true
         base_link:
           Value: true
         d455_back_accel_frame:
-          Value: true
+          Value: false
         d455_back_accel_optical_frame:
-          Value: true
+          Value: false
         d455_back_bottom_screw_frame:
-          Value: true
+          Value: false
         d455_back_color_frame:
-          Value: true
+          Value: false
         d455_back_color_optical_frame:
-          Value: true
+          Value: false
         d455_back_depth_frame:
-          Value: true
+          Value: false
         d455_back_depth_optical_frame:
-          Value: true
+          Value: false
         d455_back_gyro_frame:
-          Value: true
+          Value: false
         d455_back_gyro_optical_frame:
-          Value: true
+          Value: false
         d455_back_imu_optical_frame:
-          Value: true
+          Value: false
         d455_back_infra1_frame:
-          Value: true
+          Value: false
         d455_back_infra1_optical_frame:
-          Value: true
+          Value: false
         d455_back_infra2_frame:
-          Value: true
+          Value: false
         d455_back_infra2_optical_frame:
-          Value: true
+          Value: false
         d455_back_link:
           Value: true
         d455_front_accel_frame:
-          Value: true
+          Value: false
         d455_front_accel_optical_frame:
-          Value: true
+          Value: false
         d455_front_bottom_screw_frame:
-          Value: true
+          Value: false
         d455_front_color_frame:
-          Value: true
+          Value: false
         d455_front_color_optical_frame:
-          Value: true
+          Value: false
         d455_front_depth_frame:
-          Value: true
+          Value: false
         d455_front_depth_optical_frame:
-          Value: true
+          Value: false
         d455_front_gyro_frame:
-          Value: true
+          Value: false
         d455_front_gyro_optical_frame:
-          Value: true
+          Value: false
         d455_front_imu_optical_frame:
-          Value: true
+          Value: false
         d455_front_infra1_frame:
-          Value: true
+          Value: false
         d455_front_infra1_optical_frame:
-          Value: true
+          Value: false
         d455_front_infra2_frame:
-          Value: true
+          Value: false
         d455_front_infra2_optical_frame:
-          Value: true
+          Value: false
         d455_front_link:
           Value: true
         d455_left_accel_frame:
-          Value: true
+          Value: false
         d455_left_accel_optical_frame:
-          Value: true
+          Value: false
         d455_left_bottom_screw_frame:
-          Value: true
+          Value: false
         d455_left_color_frame:
-          Value: true
+          Value: false
         d455_left_color_optical_frame:
-          Value: true
+          Value: false
         d455_left_depth_frame:
-          Value: true
+          Value: false
         d455_left_depth_optical_frame:
-          Value: true
+          Value: false
         d455_left_gyro_frame:
-          Value: true
+          Value: false
         d455_left_gyro_optical_frame:
-          Value: true
+          Value: false
         d455_left_imu_optical_frame:
-          Value: true
+          Value: false
         d455_left_infra1_frame:
-          Value: true
+          Value: false
         d455_left_infra1_optical_frame:
-          Value: true
+          Value: false
         d455_left_infra2_frame:
-          Value: true
+          Value: false
         d455_left_infra2_optical_frame:
-          Value: true
+          Value: false
         d455_left_link:
           Value: true
         d455_right_accel_frame:
-          Value: true
+          Value: false
         d455_right_accel_optical_frame:
-          Value: true
+          Value: false
         d455_right_bottom_screw_frame:
-          Value: true
+          Value: false
         d455_right_color_frame:
-          Value: true
+          Value: false
         d455_right_color_optical_frame:
-          Value: true
+          Value: false
         d455_right_depth_frame:
-          Value: true
+          Value: false
         d455_right_depth_optical_frame:
-          Value: true
+          Value: false
         d455_right_gyro_frame:
-          Value: true
+          Value: false
         d455_right_gyro_optical_frame:
-          Value: true
+          Value: false
         d455_right_imu_optical_frame:
-          Value: true
+          Value: false
         d455_right_infra1_frame:
-          Value: true
+          Value: false
         d455_right_infra1_optical_frame:
-          Value: true
+          Value: false
         d455_right_infra2_frame:
-          Value: true
+          Value: false
         d455_right_infra2_optical_frame:
-          Value: true
+          Value: false
         d455_right_link:
           Value: true
         imu_link:
-          Value: true
+          Value: false
         map:
           Value: true
         odom:
@@ -185,21 +190,109 @@ Visualization Manager:
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
         map:
           odom:
-            {}
+            base_link:
+              altimeter_link:
+                {}
+              d455_back_bottom_screw_frame:
+                d455_back_link:
+                  d455_back_accel_frame:
+                    d455_back_accel_optical_frame:
+                      {}
+                  d455_back_color_frame:
+                    d455_back_color_optical_frame:
+                      {}
+                  d455_back_depth_frame:
+                    d455_back_depth_optical_frame:
+                      {}
+                  d455_back_gyro_frame:
+                    d455_back_gyro_optical_frame:
+                      d455_back_imu_optical_frame:
+                        {}
+                  d455_back_infra1_frame:
+                    d455_back_infra1_optical_frame:
+                      {}
+                  d455_back_infra2_frame:
+                    d455_back_infra2_optical_frame:
+                      {}
+              d455_front_bottom_screw_frame:
+                d455_front_link:
+                  d455_front_accel_frame:
+                    d455_front_accel_optical_frame:
+                      {}
+                  d455_front_color_frame:
+                    d455_front_color_optical_frame:
+                      {}
+                  d455_front_depth_frame:
+                    d455_front_depth_optical_frame:
+                      {}
+                  d455_front_gyro_frame:
+                    d455_front_gyro_optical_frame:
+                      d455_front_imu_optical_frame:
+                        {}
+                  d455_front_infra1_frame:
+                    d455_front_infra1_optical_frame:
+                      {}
+                  d455_front_infra2_frame:
+                    d455_front_infra2_optical_frame:
+                      {}
+              d455_left_bottom_screw_frame:
+                d455_left_link:
+                  d455_left_accel_frame:
+                    d455_left_accel_optical_frame:
+                      {}
+                  d455_left_color_frame:
+                    d455_left_color_optical_frame:
+                      {}
+                  d455_left_depth_frame:
+                    d455_left_depth_optical_frame:
+                      {}
+                  d455_left_gyro_frame:
+                    d455_left_gyro_optical_frame:
+                      d455_left_imu_optical_frame:
+                        {}
+                  d455_left_infra1_frame:
+                    d455_left_infra1_optical_frame:
+                      {}
+                  d455_left_infra2_frame:
+                    d455_left_infra2_optical_frame:
+                      {}
+              d455_right_bottom_screw_frame:
+                d455_right_link:
+                  d455_right_accel_frame:
+                    d455_right_accel_optical_frame:
+                      {}
+                  d455_right_color_frame:
+                    d455_right_color_optical_frame:
+                      {}
+                  d455_right_depth_frame:
+                    d455_right_depth_optical_frame:
+                      {}
+                  d455_right_gyro_frame:
+                    d455_right_gyro_optical_frame:
+                      d455_right_imu_optical_frame:
+                        {}
+                  d455_right_infra1_frame:
+                    d455_right_infra1_optical_frame:
+                      {}
+                  d455_right_infra2_frame:
+                    d455_right_infra2_optical_frame:
+                      {}
+              imu_link:
+                {}
       Update Interval: 0
       Value: true
     - Acceleration properties:
         Acc. vector alpha: 1
         Acc. vector color: 255; 0; 0
-        Acc. vector scale: 1
+        Acc. vector scale: 0.10000000149011612
         Derotate acceleration: true
         Enable acceleration: true
       Axes properties:
-        Axes scale: 1
+        Axes scale: 0.5
         Enable axes: true
       Box properties:
         Box alpha: 1
@@ -356,6 +449,41 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz_default_plugins/PoseWithCovariance
+      Color: 255; 25; 0
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: PoseWithCovariance
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /altimeter/pose
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -402,25 +530,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 16.22372817993164
+      Distance: 6.7031755447387695
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.6002894639968872
-        Y: -0.13146063685417175
-        Z: 0.284008651971817
+        X: 0.3268406391143799
+        Y: -0.18881237506866455
+        Z: 0.4043106436729431
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8997969627380371
+      Pitch: 0.47479695081710815
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.8134944438934326
+      Yaw: 2.433490037918091
     Saved: ~
 Window Geometry:
   Displays:
