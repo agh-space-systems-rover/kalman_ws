@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+# Please run this script from within the Distrobox if
+# you do not have Ubuntu + ROS 2 installed on your machine.
+
+# Build the overlay.
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+overlay_dir="$(cd "$script_dir/../overlay_ws" && pwd)"
+
+# Remember the previous directory.
+prev_dir=$(pwd)
+
+# Enter the workspace.
+cd $overlay_dir
+
+# Build the workspace.
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --parallel-workers 1 --allow-overriding rtabmap_sync
+
+# Return to the previous directory.
+cd $prev_dir

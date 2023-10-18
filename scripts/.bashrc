@@ -1,5 +1,5 @@
 # This Bash source script configures Kalman workspace on login.
-# It should work both in Distrobox and in a standalone system.
+# It should work both in Distrobox and in a standalone Ubuntu system.
 
 # Source the real .bashrc. This way this script ca be used directly when launching Bash.
 source $HOME/.bashrc
@@ -21,6 +21,11 @@ fi
 
 # Source the ROS 2 setup script on each activation.
 source /opt/ros/humble/setup.bash
+
+# Source prebuilt overlay here.
+if [ -f "$_KALMAN_WS_ROOT/overlay_ws/install/setup.bash" ]; then
+    source $_KALMAN_WS_ROOT/overlay_ws/install/setup.bash
+fi
 
 # Source the development workspace setup script if available.
 if [ -f "$_KALMAN_WS_ROOT/install/setup.bash" ]; then

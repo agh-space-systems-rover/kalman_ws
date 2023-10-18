@@ -46,6 +46,9 @@ RUN rosdep init --rosdistro humble --as-root "apt:no pip:no"
 RUN apt-get install -y python3-pip
 RUN pip3 install setuptools==58.2.0
 
+# Install additional dependencies for the ease of use.
+RUN apt-get install -y iputils-ping nano vim
+
 # Clean up caches.
 RUN rm -rf /var/lib/apt/lists/*
 RUN rm -rf /tmp/*

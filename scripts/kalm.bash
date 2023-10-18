@@ -4,11 +4,7 @@ kalm() {
         build
     elif [[ $cmd == "clen" ]]; then
         clean
-    elif [[ $cmd == "pul" ]]; then
-        pull
-    elif [[ $cmd == "pusz" ]]; then
-        push
     else
-        echo "panik"
+        echo "panik!!"
     fi
 }
