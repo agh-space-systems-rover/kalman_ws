@@ -28,7 +28,7 @@ build() {
     fi
 
     # Source the setup script.
-    source install/setup.bash
+    source install/local_setup.bash
 
     # Load .vscode/settings.json.
     echo "Updating Visual Studio Code settings..."

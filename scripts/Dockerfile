@@ -33,10 +33,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 RUN apt-get install -y ros-humble-desktop
 RUN apt-get install -y ros-dev-tools
 
-# Source the ROS 2 environment.
-# (This script is always run in a Bash environment.)
-# RUN source /opt/ros/humble/setup.bash
-
 # Initialize rosdep.
 RUN rosdep init --rosdistro humble --as-root "apt:no pip:no" 
 
