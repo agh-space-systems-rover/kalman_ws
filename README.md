@@ -9,9 +9,7 @@ ROS 2 development environment for the Kalman rover
 
 ## Getting Started
 
-This repository uses Git LFS extension to facilitate version control of large `.so` binaries for precompiled libraries required by our project. **BEFORE YOU CLONE** this repository, you must install the Git LFS addon using your system's package manager or by downloading it directly as described [here](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage). This hyperlink also contains instructions on how to verify if the extension works correctly.
-
-After Git LFS is installed you're free to clone the repository on your machine:
+Firstly clone the repository on your machine:
 ```bash
 git clone --recurse-submodules git@github.com:agh-space-systems-rover/kalman_ws.git
 ```
