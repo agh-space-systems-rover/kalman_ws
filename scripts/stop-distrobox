@@ -1,3 +1,3 @@
 #!/usr/bin/sh
 
-distrobox stop --yes kalman
+distrobox stop --yes kalman_ws

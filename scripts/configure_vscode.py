@@ -42,13 +42,13 @@ else:
 running_distrobox = "DISTROBOX_HOST_HOME" in os.environ
 if running_distrobox:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman": {"path": f"{ws_dir}/scripts/distrobox"}
+        "kalman_ws": {"path": f"{ws_dir}/scripts/distrobox"}
     }
 else:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/.bashrc"}
+        "kalman_ws": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/.bashrc"}
     }
-config["terminal.integrated.defaultProfile.linux"] = "kalman"
+config["terminal.integrated.defaultProfile.linux"] = "kalman_ws"
 
 # Reset paths.
 config["python.autoComplete.extraPaths"] = [site_dir, dist_dir]

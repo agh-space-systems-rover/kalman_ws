@@ -68,6 +68,6 @@ See: [macros.bash](/scripts/macros.bash)
     ├─ .bashrc             # Kalman dev env Bash overlay; Can be sourced both from Distrobox or from a standalone system.
     ├─ configure_vscode.py # Visual Studio auto-complete configuration script; called from macros.bash
     ├─ Dockerfile          # ROS 2 (Desktop) image recipe; Does not assume Distrobox.
-    ├─ distrobox     # Distrobox launch script
+    ├─ distrobox           # Distrobox launch script
     └─ macros.bash         # Implements useful development macros; included by .bashrc
 ```

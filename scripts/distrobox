@@ -8,22 +8,22 @@ distrobox_home="$ws_dir/.distrobox"
 # This is much faster than checking if the Distrobox instance exists.
 if [[ ! -d $distrobox_home ]]; then
     # Check if Distrobox instance exists.
-    if [[ $(distrobox list --no-color | grep "kalman:ros2" | wc -l) -ne 0 ]]; then
+    if [[ $(distrobox list --no-color | grep "kalman_ws:ros2" | wc -l) -ne 0 ]]; then
         # Remove the Distrobox.
         echo "Removing existing Distrobox..."
         # Make the home directory so that distrobox rm doesn't complain.
         mkdir -p $distrobox_home
-        distrobox stop --yes kalman
-        distrobox rm --force --rm-home kalman
+        distrobox stop --yes kalman_ws
+        distrobox rm --force --rm-home kalman_ws
     fi
 
     # Check if Docker image exists.
-    if [[ "$(docker images -q kalman:ros2 2> /dev/null)" == "" ]]; then
+    if [[ "$(docker images -q kalman_ws:ros2 2> /dev/null)" == "" ]]; then
         echo "Building Docker image..."
 
         # Build the Docker image
         # DOCKER_BUILDKIT=1 is required to suppress deprecation warnings.
-        DOCKER_BUILDKIT=1 docker build --tag kalman:ros2 $script_dir
+        DOCKER_BUILDKIT=1 docker build --tag kalman_ws:ros2 $script_dir
         if [[ $? -ne 0 ]]; then
             echo "Failed to build Docker image."
             exit 1
@@ -41,7 +41,7 @@ if [[ ! -d $distrobox_home ]]; then
     ln -s $HOME/.ssh $distrobox_home/.ssh
 
     # Create the Distrobox.
-    distrobox create --image kalman:ros2 --name kalman --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --nvidia --no-entry
+    distrobox create --image kalman_ws:ros2 --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --nvidia --no-entry
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
         exit 1
@@ -50,4 +50,4 @@ fi
 
 # Enter the Distrobox using a custom shell entrypoint which will
 # ensure that the login script is always sourced in .bashrc.
-distrobox enter kalman -- sh -c "DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC=$ws_dir bash --rcfile $script_dir/.bashrc"
+distrobox enter kalman_ws -- sh -c "DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC=$ws_dir bash --rcfile $script_dir/.bashrc"
