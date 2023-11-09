@@ -43,7 +43,7 @@ RUN apt-get install -y python3-pip
 RUN pip3 install setuptools==58.2.0
 
 # Install additional dependencies for the ease of use.
-RUN apt-get install -y iputils-ping nano vim
+RUN apt-get install -y iputils-ping nano vim python-is-python3
 
 # Clean up caches.
 RUN rm -rf /var/lib/apt/lists/*
