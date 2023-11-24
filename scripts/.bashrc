@@ -1,11 +1,11 @@
 # This Bash source script configures Kalman workspace on login.
 # It should work both in Distrobox and in a standalone Ubuntu system.
 
-# Source the real .bashrc. This way this script ca be used directly when launching Bash.
-source $HOME/.bashrc
-
 # Check if started inside of Distrobox and find workspace root accordingly.
 if [ ! -z "$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC" ]; then
+    # Source the real .bashrc. This way this script can be used directly when launching Bash.
+    source $HOME/.bashrc
+
     # Ensure that host-spawn is properly installed.
     distrobox-host-exec --yes cat /dev/null
     
@@ -15,8 +15,11 @@ if [ ! -z "$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC" ]; then
     # Extract the workspace root from the marker variable.
     _KALMAN_WS_ROOT=$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC
     unset DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC
+    _KALMAN_WS_RUNNING_IN_DISTROBOX=true
 else
-    _KALMAN_WS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+    # If it was not started from the "distrobox" script, assume
+    # that this file was sourced from within a running shell.
+    _KALMAN_WS_ROOT="$(realpath $BASH_SOURCE)"
 fi
 
 # Source the ROS 2 setup script on each activation.
