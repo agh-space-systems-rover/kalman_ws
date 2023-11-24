@@ -25,11 +25,14 @@ include_dir = os.path.expanduser("~/.vscode-paths/ros2-include")
 usr_include_dir = os.path.expanduser("~/.vscode-paths/usr-include")
 
 # If needed, copy ROS 2 site-packages and dist-packages to ~ for auto-complete on the host.
-copy_if_updated(glob.glob("/opt/ros/*/lib/python*/site-packages")[0], site_dir)
-copy_if_updated(glob.glob("/opt/ros/*/local/lib/python*/dist-packages")[0], dist_dir)
-# Also copy C++ headers.
-copy_if_updated(glob.glob("/opt/ros/*/include")[0], include_dir)
-copy_if_updated("/usr/include", usr_include_dir)
+if "_KALMAN_WS_RUNNING_IN_DISTROBOX" in os.environ:
+    copy_if_updated(glob.glob("/opt/ros/*/lib/python*/site-packages")[0], site_dir)
+    copy_if_updated(
+        glob.glob("/opt/ros/*/local/lib/python*/dist-packages")[0], dist_dir
+    )
+    # Also copy C++ headers.
+    copy_if_updated(glob.glob("/opt/ros/*/include")[0], include_dir)
+    copy_if_updated("/usr/include", usr_include_dir)
 
 # Load the configuration files.
 if os.path.isfile(config_path):
@@ -51,8 +54,12 @@ else:
 config["terminal.integrated.defaultProfile.linux"] = "kalman_ws"
 
 # Reset paths.
-config["python.autoComplete.extraPaths"] = [site_dir, dist_dir]
-config["C_Cpp.default.includePath"] = [include_dir + "/**", usr_include_dir + "/**"]
+if "_KALMAN_WS_RUNNING_IN_DISTROBOX" in os.environ:
+    config["python.autoComplete.extraPaths"] = [site_dir, dist_dir]
+    config["C_Cpp.default.includePath"] = [include_dir + "/**", usr_include_dir + "/**"]
+else:
+    config["python.autoComplete.extraPaths"] = []
+    config["C_Cpp.default.includePath"] = []
 
 # Find the install directory.
 install_dir = os.path.join(ws_dir, "install")
