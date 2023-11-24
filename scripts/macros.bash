@@ -17,6 +17,56 @@ build() {
     echo "Installing dependencies..."
     rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-path src
 
+    # Install additional APT dependencies.
+    # Those are located in the apt_packages.txt file in each package.
+    # Use colcon to list packages and paths to them.
+    # Then check if apt_packages.txt exists in each path.
+    # If it does, install the packages using apt.
+    echo "Installing custom APT dependencies..."
+    PKG_PATHS=$(colcon list | grep -oP '(?<=\s)[^ ]+(?=\s)')
+    INSTALLED_APT_IDS=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
+    for PKG_PATH in $PKG_PATHS; do
+        if [ -f "$PKG_PATH/apt_packages.txt" ]; then
+            # Read apt_packages.txt.
+            APT_IDS=$(cat $PKG_PATH/apt_packages.txt)
+            # For each package name, check if it is installed.
+            # If not, install it.
+            for APT_ID in $APT_IDS; do
+                # Check if APT_ID is in INSTALLED_APT_IDS.
+                # INSTALLED_APT_IDS="package-1 package-2 ..."
+                if [[ $INSTALLED_APT_IDS != *"$APT_ID"* ]]; then
+                    echo "Installing $APT_ID..."
+                    sudo apt install -y $APT_ID
+                fi
+            done
+        fi
+    done
+
+    # Install additional PIP dependencies.
+    # Those are located in the requirements.txt file in each package.
+    # Use colcon to list packages and paths to them.
+    # Then check if requirements.txt exists in each path.
+    # If it does, install the packages using pip.
+    echo "Installing custom PIP dependencies..."
+    INSTALLED_PIP_IDS=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
+    for PKG_PATH in $PKG_PATHS; do
+        if [ -f "$PKG_PATH/requirements.txt" ]; then
+            # Read requirements.txt.
+            PIP_IDS=$(cat $PKG_PATH/requirements.txt | sed 's/\s*#.*//g')
+            # For each package name, check if it is installed.
+            # If not, install it.
+            for PIP_ID in $PIP_IDS; do
+                # Check if PIP_ID is in INSTALLED_PIP_IDS.
+                # INSTALLED_PIP_IDS="package-1 package-2..."
+                PIP_ID_WITHOUT_VERSION=$(echo $PIP_ID | cut -d '=' -f 1)
+                if [[ $INSTALLED_PIP_IDS != *"$PIP_ID_WITHOUT_VERSION"* ]]; then
+                    echo "Installing $PIP_ID..."
+                    pip install $PIP_ID
+                fi
+            done
+        fi
+    done
+
     # Build the workspace.
     echo "Building packages..."
     colcon build --symlink-install --base-paths src
@@ -27,7 +77,8 @@ build() {
         return
     fi
 
-    # Source the setup script.
+    # Source setup scripts.
+    source /opt/ros/humble/local_setup.bash
     source install/local_setup.bash
 
     # Load .vscode/settings.json.
