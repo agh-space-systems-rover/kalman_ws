@@ -19,7 +19,7 @@ if [ ! -z "$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC" ]; then
 else
     # If it was not started from the "distrobox" script, assume
     # that this file was sourced from within a running shell.
-    _KALMAN_WS_ROOT="$(realpath $BASH_SOURCE)"
+    _KALMAN_WS_ROOT=$(realpath $(dirname $BASH_SOURCE)/..)
 fi
 
 # Source the ROS 2 setup script on each activation.
