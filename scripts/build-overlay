@@ -14,6 +14,6 @@ prev_dir=$(pwd)
 cd $overlay_dir
 
 # Build the workspace.
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --parallel-workers 1 --allow-overriding rtabmap_sync phidgets_spatial phidgets_api
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --parallel-workers 1 --allow-overriding rtabmap_sync
 # Return to the previous directory.
 cd $prev_dir
