@@ -1,7 +1,6 @@
 # Included by ./.bashrc
 
 # Executes colcon build in workspace.
-# TODO: Auto-install all */requiremets.txt found in src (up to depth = 3?)
 build() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT

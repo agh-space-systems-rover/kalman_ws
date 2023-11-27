@@ -13,13 +13,13 @@ if [ ! -z "$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC" ]; then
     export SHELL=/usr/bin/bash
 
     # Extract the workspace root from the marker variable.
-    _KALMAN_WS_ROOT=$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC
+    export _KALMAN_WS_ROOT=$DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC
     unset DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC
-    _KALMAN_WS_RUNNING_IN_DISTROBOX=true
+    export _KALMAN_WS_RUNNING_IN_DISTROBOX=1
 else
     # If it was not started from the "distrobox" script, assume
     # that this file was sourced from within a running shell.
-    _KALMAN_WS_ROOT="$(realpath $BASH_SOURCE)"
+    export _KALMAN_WS_ROOT="$(realpath $BASH_SOURCE)"
 fi
 
 # Source the ROS 2 setup script on each activation.
