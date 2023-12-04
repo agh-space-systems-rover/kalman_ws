@@ -1,0 +1,1 @@
+builtin_interfaces;nav2_costmap_2d;geometry_msgs;pluginlib;sensor_msgs;std_msgs;std_srvs;laser_geometry;libpcl-all;pcl_conversions;rclcpp;message_filters;tf2_ros;tf2_geometry_msgs;tf2_sensor_msgs;visualization_msgs;libopenvdb-dev;libopenvdb;libopenexr-dev;rosidl_default_runtime;ament_lint_auto

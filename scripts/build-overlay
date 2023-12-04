@@ -14,6 +14,12 @@ prev_dir=$(pwd)
 cd $overlay_dir
 
 # Build the workspace.
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --parallel-workers 1 --allow-overriding rtabmap_sync
+MAKEFLAGS="-j 6" colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --allow-overriding rtabmap_sync
+
+# Copy OpenVDB libs to install directory.
+cp ./build/spatio_temporal_voxel_layer/openvdb/lib/libopenvdb.so ./install/spatio_temporal_voxel_layer/lib/
+cp ./build/spatio_temporal_voxel_layer/openvdb/lib/libopenvdb.so.10.0 ./install/spatio_temporal_voxel_layer/lib/
+cp ./build/spatio_temporal_voxel_layer/openvdb/lib/libopenvdb.so.10.0.1 ./install/spatio_temporal_voxel_layer/lib/
+
 # Return to the previous directory.
 cd $prev_dir
