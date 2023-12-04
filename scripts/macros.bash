@@ -12,9 +12,21 @@ build() {
         rosdep update --rosdistro $ROS_DISTRO --default-yes
     fi
 
+    # Find packages to build.
+    # If no arguments are provided, build all packages.
+    pkg_paths=$(colcon list --base-paths src | grep -oP '(?<=\s)[^ ]+(?=\s)')
+    if [ $# -ne 0 ]; then
+        pkg_paths=$(echo $pkg_paths | tr ' ' '\n' | grep -f <(echo $@))
+    fi
+    echo "Packages to build:"
+    pkg_names=$(echo $pkg_paths | tr ' ' '\n' | rev | cut -d '/' -f 1 | rev | sed 's/^/  /')
+    for pkg in $pkg_names; do
+        echo '  -' $pkg
+    done
+
     # Install rosdep dependencies.
     echo "Installing dependencies..."
-    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-path src
+    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
 
     # Install additional APT dependencies.
     # Those are located in the apt_packages.txt file in each package.
@@ -22,20 +34,19 @@ build() {
     # Then check if apt_packages.txt exists in each path.
     # If it does, install the packages using apt.
     echo "Installing custom APT dependencies..."
-    PKG_PATHS=$(colcon list | grep -oP '(?<=\s)[^ ]+(?=\s)')
-    INSTALLED_APT_IDS=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
-    for PKG_PATH in $PKG_PATHS; do
-        if [ -f "$PKG_PATH/apt_packages.txt" ]; then
+    installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
+    for pkg_path in $pkg_paths; do
+        if [ -f "$pkg_path/apt_packages.txt" ]; then
             # Read apt_packages.txt.
-            APT_IDS=$(cat $PKG_PATH/apt_packages.txt)
+            apt_ids=$(cat $pkg_path/apt_packages.txt)
             # For each package name, check if it is installed.
             # If not, install it.
-            for APT_ID in $APT_IDS; do
-                # Check if APT_ID is in INSTALLED_APT_IDS.
-                # INSTALLED_APT_IDS="package-1 package-2 ..."
-                if [[ $INSTALLED_APT_IDS != *"$APT_ID"* ]]; then
-                    echo "Installing $APT_ID..."
-                    sudo apt install -y $APT_ID
+            for apt_id in $apt_ids; do
+                # Check if apt_id is in installed_apt_ids.
+                # installed_apt_ids="package-1 package-2 ..."
+                if [[ $installed_apt_ids != *"$apt_id"* ]]; then
+                    echo "Installing $apt_id..."
+                    sudo apt install -y $apt_id
                 fi
             done
         fi
@@ -47,20 +58,20 @@ build() {
     # Then check if requirements.txt exists in each path.
     # If it does, install the packages using pip.
     echo "Installing custom PIP dependencies..."
-    INSTALLED_PIP_IDS=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
-    for PKG_PATH in $PKG_PATHS; do
-        if [ -f "$PKG_PATH/requirements.txt" ]; then
+    installed_pip_ids=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
+    for pkg_path in $pkg_paths; do
+        if [ -f "$pkg_path/requirements.txt" ]; then
             # Read requirements.txt.
-            PIP_IDS=$(cat $PKG_PATH/requirements.txt | sed 's/\s*#.*//g')
+            pip_ids=$(cat $pkg_path/requirements.txt | sed 's/\s*#.*//g')
             # For each package name, check if it is installed.
             # If not, install it.
-            for PIP_ID in $PIP_IDS; do
-                # Check if PIP_ID is in INSTALLED_PIP_IDS.
-                # INSTALLED_PIP_IDS="package-1 package-2..."
-                PIP_ID_WITHOUT_VERSION=$(echo $PIP_ID | cut -d '=' -f 1)
-                if [[ $INSTALLED_PIP_IDS != *"$PIP_ID_WITHOUT_VERSION"* ]]; then
-                    echo "Installing $PIP_ID..."
-                    pip install $PIP_ID
+            for pip_id in $pip_ids; do
+                # Check if PIP_ID is in installed_pip_ids.
+                # installed_pip_ids="package-1 package-2..."
+                pip_id_without_version=$(echo $pip_id | cut -d '=' -f 1)
+                if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
+                    echo "Installing $pip_id..."
+                    pip install $pip_id
                 fi
             done
         fi
@@ -68,7 +79,7 @@ build() {
 
     # Build the workspace.
     echo "Building packages..."
-    colcon build --symlink-install --base-paths src
+    colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
         cd $prev_dir
