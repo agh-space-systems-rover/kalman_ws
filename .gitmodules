@@ -1,3 +1,6 @@
 [submodule "src/kalman_robot"]
 	path = src/kalman_robot
 	url = git@github.com:agh-space-systems-rover/kalman_robot.git
+[submodule "overlay_ws/src/spatio_temporal_voxel_layer"]
+	path = overlay_ws/src/spatio_temporal_voxel_layer
+	url = git@github.com:nachovizzo/spatio_temporal_voxel_layer.git
