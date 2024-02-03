@@ -14,16 +14,28 @@ build() {
 
     # Find packages to build.
     # If no arguments are provided, build all packages.
-    pkg_paths=$(colcon list --base-paths src | grep -oP '(?<=\s)[^ ]+(?=\s)')
+    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
+    pkg_info=($pkg_info)
+    pkg_names=""
+    pkg_paths=""
+    # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
     if [ $# -ne 0 ]; then
-        pkg_paths=$(echo $pkg_paths | tr ' ' '\n' | grep -f <(echo $@))
+        # If arguments are provided, build only those packages whose name or path match the regex.
+        # use grep -f <(echo $@)
+        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+            name=${pkg_info[$i]}
+            path=${pkg_info[$i + 1]}
+            if [[ $name =~ $@ || $path =~ $@ ]]; then
+                pkg_names="$pkg_names $name"
+                pkg_paths="$pkg_paths $path"
+            fi
+        done
     fi
     echo "Packages to build:"
-    pkg_names=$(echo $pkg_paths | tr ' ' '\n' | rev | cut -d '/' -f 1 | rev | sed 's/^/  /')
     for pkg in $pkg_names; do
         echo '  -' $pkg
     done
-
+    
     # Install rosdep dependencies.
     echo "Installing dependencies..."
     rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
