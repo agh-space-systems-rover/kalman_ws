@@ -78,6 +78,18 @@ if os.path.isdir(install_dir):
             for include_dir in glob.glob(os.path.join(item_dir, "include")):
                 config["C_Cpp.default.includePath"].append(include_dir + "/**")
 
+# If running in Distrobox, add the host's user site-packages and dist-packages to the paths.
+if running_distrobox:
+    for site_packages_dir in glob.glob(
+        os.path.expanduser("~/.local/lib/python*/site-packages")
+    ):
+        config["python.autoComplete.extraPaths"].append(site_packages_dir)
+
+    for dist_packages_dir in glob.glob(
+        os.path.expanduser("~/.local/lib/python*/dist-packages")
+    ):
+        config["python.autoComplete.extraPaths"].append(dist_packages_dir)
+
 # Sort the paths.
 config["python.autoComplete.extraPaths"].sort()
 

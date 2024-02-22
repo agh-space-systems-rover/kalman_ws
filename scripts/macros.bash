@@ -80,7 +80,7 @@ build() {
             for pip_id in $pip_ids; do
                 # Check if PIP_ID is in installed_pip_ids.
                 # installed_pip_ids="package-1 package-2..."
-                pip_id_without_version=$(echo $pip_id | cut -d '=' -f 1)
+                pip_id_without_version=$(echo $pip_id | cut -d '=' -f 1 | cut -d '>' -f 1 | cut -d '<' -f 1)
                 if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
                     echo "Installing $pip_id..."
                     pip install $pip_id
