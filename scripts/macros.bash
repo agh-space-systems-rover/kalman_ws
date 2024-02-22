@@ -31,14 +31,24 @@ build() {
             fi
         done
     fi
-    echo "Packages to build:"
-    for pkg in $pkg_names; do
-        echo '  -' $pkg
-    done
+
+    # Display which packages will be built if filtering is used.
+    if [ ! -z "$pkg_names" ]; then
+        echo "Packages to build:"
+        for pkg in $pkg_names; do
+            echo '  -' $pkg
+        done
+    fi
     
     # Install rosdep dependencies.
     echo "Installing dependencies..."
-    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
+    if [ -z "$pkg_paths" ]; then
+        # If no packages are selected, install dependencies for all packages.
+        rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths src
+    else
+        # If packages are selected, install dependencies for those packages only.
+        rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
+    fi
 
     # Install additional APT dependencies.
     # Those are located in the apt_packages.txt file in each package.
@@ -91,7 +101,13 @@ build() {
 
     # Build the workspace.
     echo "Building packages..."
-    colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names
+    if [ -z "$pkg_names" ]; then
+        # If no packages are selected, build all packages.
+        colcon build --symlink-install --base-paths src
+    else
+        # If packages are selected, build only those packages.
+        colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names
+    fi
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
         cd $prev_dir
