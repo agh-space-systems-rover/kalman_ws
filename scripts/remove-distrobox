@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 
 distrobox stop --yes kalman_ws
-distrobox rm --force --rm-home kalman_ws
+distrobox rm --yes --force --rm-home kalman_ws
 
 # Remove ~/.distrobox because it won't be removed by Distrobox if workspace was moved to a different location.
 script_dir="$(cd "$(dirname "$0")" && pwd)"

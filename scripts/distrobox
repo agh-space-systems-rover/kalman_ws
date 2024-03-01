@@ -46,8 +46,11 @@ if [[ ! -d $distrobox_home ]]; then
         echo "Failed to create Distrobox instance."
         exit 1
     fi
+
+    # Copy over distrobox.bashrc.
+    cp $script_dir/distrobox.bashrc $distrobox_home/.bashrc
 fi
 
 # Enter the Distrobox using a custom shell entrypoint which will
 # ensure that the login script is always sourced in .bashrc.
-distrobox enter kalman_ws -- sh -c "DISTROBOX_WS_ROOT_TEMP_VAR_LATER_REMOVED_BY_BASHRC=$ws_dir bash --rcfile $script_dir/.bashrc"
+distrobox enter kalman_ws
