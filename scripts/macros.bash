@@ -141,6 +141,72 @@ clean() {
     unset CMAKE_PREFIX_PATH
 }
 
+format() {
+    prev_dir=$(pwd)
+    cd $_KALMAN_WS_ROOT
+
+    echo "Formatting packages..."
+    echo
+
+    # Throw if workspace has not been built.
+    if [ ! -d "build" ]; then
+        echo "Workspace has not been built yet. Run 'build' first."
+        cd $prev_dir
+        unset prev_dir
+        return
+    fi
+
+    # Find packages to format.
+    # If no arguments are provided, format all packages.
+    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
+    pkg_info=($pkg_info)
+    pkg_names=""
+    pkg_paths=""
+    # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
+    for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+        name=${pkg_info[$i]}
+        path=${pkg_info[$i + 1]}
+        # Only format C++ if CMakelists.txt exists.
+        if [ -f "$path/CMakeLists.txt" ]; then
+            pkg_names="$pkg_names $name"
+            pkg_paths="$pkg_paths $path"
+        fi
+    done
+
+    # Run ament_clang_format --reformat in each package.
+    for pkg_path in $pkg_paths; do
+        cd $pkg_path
+        ament_clang_format --reformat 2>/dev/null
+        cd $_KALMAN_WS_ROOT
+    done
+
+    cd $prev_dir
+    unset prev_dir
+}
+
+test() {
+    prev_dir=$(pwd)
+    cd $_KALMAN_WS_ROOT
+
+    echo "Running tests..."
+    echo
+
+    # Throw if workspace has not been built.
+    if [ ! -d "build" ]; then
+        echo "Workspace has not been built yet. Run 'build' first."
+        cd $prev_dir
+        unset prev_dir
+        return
+    fi
+
+    # Run Colcon test.
+    colcon test --base-paths src
+
+    cd $prev_dir
+    unset prev_dir
+}
+
+
 # # Downloads non-existing repositories using VCS.
 # # Then pulls all repositories using Git.
 # pull() {
