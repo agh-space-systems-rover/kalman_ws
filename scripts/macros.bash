@@ -50,6 +50,14 @@ build() {
         rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
     fi
 
+    # Check if rosdep install was successful.
+    if [ $? -ne 0 ]; then
+        echo "Failed to install dependencies."
+        cd $prev_dir
+        unset prev_dir
+        return
+    fi
+
     # Install additional APT dependencies.
     # Those are located in the apt_packages.txt file in each package.
     # Use colcon to list packages and paths to them.

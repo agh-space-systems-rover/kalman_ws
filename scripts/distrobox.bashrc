@@ -10,6 +10,11 @@ distrobox-host-exec --yes cat /dev/null
 # Fix-up SHELL variable passed from the host.
 export SHELL=/usr/bin/bash
 
+# Fix file descriptor limits in Docker.
+# This fixes rosout memory leaks.
+ulimit -Sn 524288
+ulimit -Hn 524288
+
 # Mark that the workspace is running in Distrobox.
 # This is later referenced in macros.bash.
 export _KALMAN_WS_RUNNING_IN_DISTROBOX=1
