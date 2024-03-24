@@ -103,10 +103,10 @@ build() {
     echo "Building packages..."
     if [ -z "$pkg_names" ]; then
         # If no packages are selected, build all packages.
-        colcon build --symlink-install --base-paths src
+        colcon build --symlink-install --base-paths src --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
     else
         # If packages are selected, build only those packages.
-        colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names
+        colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
     fi
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
@@ -145,40 +145,48 @@ format() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-    echo "Formatting packages..."
-    echo
-
-    # Throw if workspace has not been built.
-    if [ ! -d "build" ]; then
-        echo "Workspace has not been built yet. Run 'build' first."
-        cd $prev_dir
-        unset prev_dir
-        return
+    # Add Python binaries to the PATH if they are not already there.
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        export PATH=$HOME/.local/bin:$PATH
     fi
 
-    # Find packages to format.
-    # If no arguments are provided, format all packages.
-    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
-    pkg_info=($pkg_info)
-    pkg_names=""
-    pkg_paths=""
-    # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
-    for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-        name=${pkg_info[$i]}
-        path=${pkg_info[$i + 1]}
-        # Only format C++ if CMakelists.txt exists.
-        if [ -f "$path/CMakeLists.txt" ]; then
-            pkg_names="$pkg_names $name"
-            pkg_paths="$pkg_paths $path"
-        fi
-    done
+    # Ensure that clang-format and black are installed from PyPI.
+    if ! command -v clang-format &> /dev/null; then
+        echo "Installing clang-format..."
+        pip3 install --user clang-format
+    fi
+    if ! command -v black &> /dev/null; then
+        echo "Installing black..."
+        pip3 install --user black
+    fi
 
-    # Run ament_clang_format --reformat in each package.
-    for pkg_path in $pkg_paths; do
-        cd $pkg_path
-        ament_clang_format --reformat 2>/dev/null
-        cd $_KALMAN_WS_ROOT
-    done
+    # Find Python files to format and run black on them.
+    python_files=$(find src -name '*.py')
+    if [ ! -z "$python_files" ]; then
+        echo "Formatting Python files:"
+        black $python_files
+        echo
+    fi
+
+    # Find C++ files to format and run clang-format on them.
+    cpp_files=$(find src -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
+    if [ ! -z "$cpp_files" ]; then
+        echo "Formatting C++ files:"
+        for file in $cpp_files; do
+            # Check if any upper directory contains an AMENT_IGNORE or COLCON_IGNORE file.
+            # If it does, skip the file.
+            dir=$(dirname "$file")
+            while [ "$dir" != "." ] && [ "$dir" != "/" ]; do
+                if [ -e "$dir/AMENT_IGNORE" ] || [ -e "$dir/COLCON_IGNORE" ]; then
+                    continue 2
+                fi
+                dir=$(dirname "$dir")
+            done
+            echo "Formatting $(basename $file)..."
+            clang-format -i $file
+        done
+        echo
+    fi
 
     cd $prev_dir
     unset prev_dir
@@ -188,8 +196,7 @@ test() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-    echo "Running tests..."
-    echo
+    echo "Running tests:"
 
     # Throw if workspace has not been built.
     if [ ! -d "build" ]; then

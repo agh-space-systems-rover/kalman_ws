@@ -47,8 +47,8 @@ if [[ ! -d $distrobox_home ]]; then
         exit 1
     fi
 
-    # Copy over distrobox.bashrc.
-    cp $script_dir/distrobox.bashrc $distrobox_home/.bashrc
+    # Link distrobox.bashrc.
+    ln -s $script_dir/distrobox.bashrc $distrobox_home/.bashrc
 fi
 
 # Enter the Distrobox using a custom shell entrypoint which will

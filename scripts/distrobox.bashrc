@@ -1,4 +1,4 @@
-# This Bash source script configures Kalman workspace Distrobox on login.
+# This bashrc script configures Kalman workspace Distrobox on login.
 # It should be run as kalman_ws/.distrobox/.bashrc.
 
 # Source the default Ubuntu configuration.

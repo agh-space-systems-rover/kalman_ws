@@ -49,7 +49,7 @@ if running_distrobox:
     }
 else:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman_ws": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/.bashrc"}
+        "kalman_ws": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/native-ubuntu.bashrc"}
     }
 config["terminal.integrated.defaultProfile.linux"] = "kalman_ws"
 
