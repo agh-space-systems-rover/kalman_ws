@@ -11,20 +11,7 @@ fi
 # Enable Cyclone DDS.
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-# Source the ROS 2 setup script on each activation.
-# local_setup.bash only sources one level of underlay
-source /opt/ros/humble/local_setup.bash
-
-# Source prebuilt overlay here.
-if [ -f "$_KALMAN_WS_ROOT/overlay_ws/install/local_setup.bash" ]; then
-    source $_KALMAN_WS_ROOT/overlay_ws/install/local_setup.bash
-fi
-
-# Source the development workspace setup script if available.
-if [ -f "$_KALMAN_WS_ROOT/install/local_setup.bash" ]; then
-    source $_KALMAN_WS_ROOT/install/local_setup.bash
-fi
-
-# Include Kalman macros.
+# Include all other setup scripts.
+source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash
 source $_KALMAN_WS_ROOT/scripts/kalm.bash

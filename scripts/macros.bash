@@ -20,17 +20,22 @@ build() {
     pkg_paths=""
     # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
     if [ $# -ne 0 ]; then
-        # If arguments are provided, build only those packages whose name or path match the regex.
-        # use grep -f <(echo $@)
+        # If arguments are provided, build only those packages whose names contain any of the provided queries.
+        queries="$@"
         for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
             name=${pkg_info[$i]}
             path=${pkg_info[$i + 1]}
-            if [[ $name =~ $@ || $path =~ $@ ]]; then
-                pkg_names="$pkg_names $name"
-                pkg_paths="$pkg_paths $path"
-            fi
+            for query in $queries; do
+                if [[ $name == *"$query"* ]]; then
+                    pkg_names="$pkg_names $name"
+                    pkg_paths="$pkg_paths $path"
+                    break
+                fi
+            done
         done
     fi
+    pkg_names=$(echo $pkg_names | sed 's/^ //')
+    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
     # Display which packages will be built if filtering is used.
     if [ ! -z "$pkg_names" ]; then
@@ -124,8 +129,7 @@ build() {
     fi
 
     # Source setup scripts.
-    source /opt/ros/humble/local_setup.bash
-    source install/local_setup.bash
+    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
     # Load .vscode/settings.json.
     echo "Updating Visual Studio Code settings..."
@@ -139,16 +143,60 @@ build() {
 
 # Removes build artifacts in workspace.
 clean() {
-    # Remove directories.
-    rm -rf $_KALMAN_WS_ROOT/build
-    rm -rf $_KALMAN_WS_ROOT/install
-    rm -rf $_KALMAN_WS_ROOT/log
+    # Select packages to clean.
+    # If no arguments are provided, select all packages.
+    # See the same code in build() for additional comments.
+    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
+    pkg_info=($pkg_info)
+    pkg_names=""
+    pkg_paths=""
+    if [ $# -ne 0 ]; then
+        queries="$@"
+        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+            name=${pkg_info[$i]}
+            path=${pkg_info[$i + 1]}
+            for query in $queries; do
+                if [[ $name == *"$query"* ]]; then
+                    pkg_names="$pkg_names $name"
+                    pkg_paths="$pkg_paths $path"
+                    break
+                fi
+            done
+        done
+    fi
+    pkg_names=$(echo $pkg_names | sed 's/^ //')
+    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
+
+    # Display which packages will be cleared if queries are used.
+    if [ ! -z "$pkg_names" ]; then
+        echo "Packages to clean:"
+        for pkg in $pkg_names; do
+            echo '  -' $pkg
+        done
+    fi
+
+    if [ -z "$pkg_names" ]; then
+        # If not arguments were provided, perform a full wipe.
+        rm -rf $_KALMAN_WS_ROOT/build
+        rm -rf $_KALMAN_WS_ROOT/install
+        rm -rf $_KALMAN_WS_ROOT/log
+    else
+        # Remove build artifacts for selected packages only.
+        for pkg_name in $pkg_names; do
+            rm -rf $_KALMAN_WS_ROOT/build/$pkg_name
+            rm -rf $_KALMAN_WS_ROOT/install/$pkg_name
+        done
+    fi
 
     # Remove paths from $AMENT_PREFIX_PATH and $CMAKE_PREFIX_PATH.
-    AMENT_PREFIX_PATH=/opt/ros/$ROS_DISTRO
+    unset AMENT_PREFIX_PATH
     unset CMAKE_PREFIX_PATH
+    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
+
+    echo "Done cleaning."
 }
 
+# Auto-formats all supported file types in the workspace.
 format() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
@@ -200,9 +248,35 @@ format() {
     unset prev_dir
 }
 
-test() {
+# Runs Colcon tests and linters in the workspace.
+# This macro cannot be named 'test' because it conflicts with the built-in test command in Bash.
+lint() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
+
+    # Select packages to test.
+    # If no arguments are provided, select all packages.
+    # See the same code in build() for additional comments.
+    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
+    pkg_info=($pkg_info)
+    pkg_names=""
+    pkg_paths=""
+    if [ $# -ne 0 ]; then
+        queries="$@"
+        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+            name=${pkg_info[$i]}
+            path=${pkg_info[$i + 1]}
+            for query in $queries; do
+                if [[ $name == *"$query"* ]]; then
+                    pkg_names="$pkg_names $name"
+                    pkg_paths="$pkg_paths $path"
+                    break
+                fi
+            done
+        done
+    fi
+    pkg_names=$(echo $pkg_names | sed 's/^ //')
+    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
     echo "Running tests:"
 
@@ -215,40 +289,128 @@ test() {
     fi
 
     # Run Colcon test.
-    colcon test --base-paths src
+    if [ -z "$pkg_names" ]; then
+        colcon test --base-paths src
+    else
+        colcon test --base-paths src --packages-select $pkg_names
+    fi
+
+    # TODO: Somethow detect test failure and provide results for only the selected packages.
 
     cd $prev_dir
     unset prev_dir
 }
 
+# Finds the largest objects current Git repository.
+git-du() {
+    # Create a table with rows formatted like so: "<hash> <size> <path>"
+    table="$(
+        git rev-list --objects --all |
+        git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' |
+        sed -n 's/^blob //p' |
+        sort --numeric-sort --key=2 |
+        cut -c 1-12,41- |
+        $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
+    )"
 
-# # Downloads non-existing repositories using VCS.
-# # Then pulls all repositories using Git.
-# pull() {
-#     prev_dir=$(pwd)
-#     cd $_KALMAN_WS_ROOT
+    # Display the 10 most space-consuming objects.
+    echo ...
+    echo "$table" | tail -n 10
 
-#     # Find all repositories.
-#     # REPOS=$(find ./src/ -name .git -execdir pwd \;)
+    # Create a sum expression from the sizes.
+    exp="$(echo "$table" | awk '{ print $2 }' | paste -sd+ -)"
+    # example exp: 923B+927B+974B+983B+1017B+1.0KiB+1.0KiB+1.1KiB+1.1KiB+1.1KiB
 
-#     # Pull all repositories.
-#     # for REPO in $REPOS; do
-#     #     cd $REPO
-#     #     git pull
-#     #     if [ $? -ne 0 ]; then
-#     #         echo "Failed to pull $REPO."
-#     #         cd $prev_dir
-#     #         unset prev_dir
-#     #         return
-#     #     fi
-#     # done
+    # Convert human-readable sizes to byte counts and then evaluate the sum.
+    exp="$(echo "$exp" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g')"
+    total="$(echo "$exp" | bc)"
 
-#     # Do the same in parallel.
-#     find ./src/ -name .git -execdir pwd \; | xargs -n 1 -P 8 -I {} git -C {} pull
+    # Count all files.
+    num_files="$(echo "$table" | wc -l)"
 
-#     cd $prev_dir
-#     unset prev_dir
-# }
+    # Display the total size and the number of files.
+    echo "$(echo "$total" | $(command -v gnumfmt || echo numfmt) --to=iec-i --suffix=B --padding=20) total ($num_files files)"
+
+    # Find the size of the pack files and convert it to byte count.
+    pack_total_hr="$(git count-objects -vH | grep -E 'size-pack' | sed 's/.*size-pack: //')"
+    pack_total="$(echo "$pack_total_hr" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g' | bc)"
+
+    # Display the size of the pack files.
+    echo "$(echo "$pack_total" | $(command -v gnumfmt || echo numfmt) --to=iec-i --suffix=B --padding=20) of pack files (represents download size only if no other branches were checked out since cloning)"
+}
+
+# Resets all submodules to main and pulls any recent changes.
+reset-pull() {
+    prev_dir=$(pwd)
+    cd $_KALMAN_WS_ROOT
+
+    # Find all submodules.
+    REPOS=$(find ./src/ -name .git -execdir pwd \;)
+
+    # # checkout
+    # echo "$REPOS" | xargs -P 8 -I {} git -C {} checkout main
+    # # reset
+    # echo "$REPOS" | xargs -P 8 -I {} git -C {} reset --hard origin/main
+    # # pull
+    # find ./src/ -name .git -execdir pwd \; | xargs -P 8 -I {} git -C {} pull
+
+    echo "Checking out on main..."
+    for REPO in $REPOS; do
+        cd $REPO
+        printf "$(basename $REPO) "
+        git_out=$(git checkout main 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "Failed to checkout on main:\n$git_out"
+            cd $prev_dir
+            unset prev_dir
+            return
+        fi
+    done
+    echo
+    echo
+
+    echo "Resetting to origin/main..."
+    for REPO in $REPOS; do
+        cd $REPO
+        printf "$(basename $REPO) "
+        git_out=$(git reset --hard origin/main 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "Failed to reset to origin/main:\n$git_out"
+            cd $prev_dir
+            unset prev_dir
+            return
+        fi
+    done
+    echo
+    echo
+
+    echo "Pulling changes..."
+    for REPO in $REPOS; do
+        cd $REPO
+        printf "$(basename $REPO) "
+        git_out=$(git pull 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "Failed to pull changes:\n$git_out"
+            cd $prev_dir
+            unset prev_dir
+            return
+        fi
+    done
+    echo
+    echo
+
+    # Print current commit hashes and statuses.
+    echo "Currently at:"
+    for REPO in $REPOS; do
+        cd $REPO
+        printf "$(basename $REPO) - "
+        git_out=$(git log -1 --oneline 2>&1)
+        echo $git_out
+    done
+
+    cd $prev_dir
+    unset prev_dir
+}
 
 # # Pushes changes in each repository.
 # # Will automatically commit if needed.
