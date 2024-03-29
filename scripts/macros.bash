@@ -57,7 +57,7 @@ build() {
 
     # Check if rosdep install was successful.
     if [ $? -ne 0 ]; then
-        echo "Failed to install dependencies."
+        echo "Failed to install rosdep dependencies."
         cd $prev_dir
         unset prev_dir
         return
@@ -82,6 +82,14 @@ build() {
                 if [[ $installed_apt_ids != *"$apt_id"* ]]; then
                     echo "Installing $apt_id..."
                     sudo apt install -y $apt_id
+
+                    # Check if installation was successful.
+                    if [ $? -ne 0 ]; then
+                        echo "Failed to install $apt_id."
+                        cd $prev_dir
+                        unset prev_dir
+                        return
+                    fi
                 fi
             done
         fi
@@ -107,6 +115,14 @@ build() {
                 if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
                     echo "Installing $pip_id..."
                     pip install $pip_id
+
+                    # Check if installation was successful.
+                    if [ $? -ne 0 ]; then
+                        echo "Failed to install $pip_id."
+                        cd $prev_dir
+                        unset prev_dir
+                        return
+                    fi
                 fi
             done
         fi

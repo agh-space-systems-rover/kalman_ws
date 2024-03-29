@@ -15,9 +15,5 @@ export SHELL=/usr/bin/bash
 ulimit -Sn 524288
 ulimit -Hn 524288
 
-# Mark that the workspace is running in Distrobox.
-# This is later referenced in macros.bash.
-export _KALMAN_WS_RUNNING_IN_DISTROBOX=1
-
 # Source the setup.
 source $(dirname $BASH_SOURCE)/../scripts/setup.bash
