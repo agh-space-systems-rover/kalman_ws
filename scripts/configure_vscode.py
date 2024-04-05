@@ -126,6 +126,8 @@ config["python.autoComplete.extraPaths"].sort()
 config["python.analysis.extraPaths"] = config["python.autoComplete.extraPaths"]
 
 # Associate Jinja2 configuration files with YAML.
+if "files.associations" not in config:
+    config["files.associations"] = {}
 config["files.associations"]["*.yaml.j2"] = "yaml"
 
 # Save the configuration file.
