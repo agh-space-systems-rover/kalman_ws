@@ -1,0 +1,6 @@
+msg/ArucoDetection.idl
+msg/ArucoDetection.msg
+msg/BoardPose.idl
+msg/BoardPose.msg
+msg/MarkerPose.idl
+msg/MarkerPose.msg

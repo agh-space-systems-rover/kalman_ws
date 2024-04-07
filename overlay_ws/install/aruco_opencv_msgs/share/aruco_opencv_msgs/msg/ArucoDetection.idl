@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from aruco_opencv_msgs/msg/ArucoDetection.msg
+// generated code does not contain a copyright notice
+
+#include "aruco_opencv_msgs/msg/BoardPose.idl"
+#include "aruco_opencv_msgs/msg/MarkerPose.idl"
+#include "std_msgs/msg/Header.idl"
+
+module aruco_opencv_msgs {
+  module msg {
+    struct ArucoDetection {
+      std_msgs::msg::Header header;
+
+      sequence<aruco_opencv_msgs::msg::MarkerPose> markers;
+
+      sequence<aruco_opencv_msgs::msg::BoardPose> boards;
+    };
+  };
+};

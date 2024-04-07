@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from aruco_opencv_msgs/msg/BoardPose.msg
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Pose.idl"
+
+module aruco_opencv_msgs {
+  module msg {
+    struct BoardPose {
+      string board_name;
+
+      geometry_msgs::msg::Pose pose;
+    };
+  };
+};
