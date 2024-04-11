@@ -159,6 +159,9 @@ build() {
 
 # Removes build artifacts in workspace.
 clean() {
+    prev_dir=$(pwd)
+    cd $_KALMAN_WS_ROOT
+
     # Select packages to clean.
     # If no arguments are provided, select all packages.
     # See the same code in build() for additional comments.
@@ -208,6 +211,9 @@ clean() {
     unset AMENT_PREFIX_PATH
     unset CMAKE_PREFIX_PATH
     source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
+
+    cd $prev_dir
+    unset prev_dir
 
     echo "Done cleaning."
 }
