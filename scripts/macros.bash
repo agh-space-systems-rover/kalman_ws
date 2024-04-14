@@ -18,9 +18,11 @@ build() {
     pkg_info=($pkg_info)
     pkg_names=""
     pkg_paths=""
+    selected_packages=false
     # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
     if [ $# -ne 0 ]; then
         # If arguments are provided, build only those packages whose names contain any of the provided queries.
+        selected_packages=true
         queries="$@"
         for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
             name=${pkg_info[$i]}
@@ -33,12 +35,20 @@ build() {
                 fi
             done
         done
+    else
+        # If no arguments are provided, build all packages.
+        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+            name=${pkg_info[$i]}
+            path=${pkg_info[$i + 1]}
+            pkg_names="$pkg_names $name"
+            pkg_paths="$pkg_paths $path"
+        done
     fi
     pkg_names=$(echo $pkg_names | sed 's/^ //')
     pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
     # Display which packages will be built if filtering is used.
-    if [ ! -z "$pkg_names" ]; then
+    if [ $selected_packages = true ]; then
         echo "Packages to build:"
         for pkg in $pkg_names; do
             echo '  -' $pkg
@@ -47,7 +57,7 @@ build() {
     
     # Install rosdep dependencies.
     echo "Installing dependencies..."
-    if [ -z "$pkg_paths" ]; then
+    if [ $selected_packages = false ]; then
         # If no packages are selected, install dependencies for all packages.
         rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths src
     else
@@ -130,7 +140,7 @@ build() {
 
     # Build the workspace.
     echo "Building packages..."
-    if [ -z "$pkg_names" ]; then
+    if [ $selected_packages = false ]; then
         # If no packages are selected, build all packages.
         colcon build --symlink-install --base-paths src --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
     else
