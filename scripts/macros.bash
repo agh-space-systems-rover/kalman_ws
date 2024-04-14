@@ -239,11 +239,13 @@ format() {
     fi
 
     # Ensure that clang-format and black are installed from PyPI.
-    if ! command -v clang-format &> /dev/null; then
+    # Use PIP to check for that because clang-format could have been installed from APT.
+    pkgs=$(pip3 freeze)
+    if ! echo $pkgs | grep -q ' clang-format=='; then
         echo "Installing clang-format..."
         pip3 install --user clang-format
     fi
-    if ! command -v black &> /dev/null; then
+    if ! echo $pkgs | grep -q ' black=='; then
         echo "Installing black..."
         pip3 install --user black
     fi
