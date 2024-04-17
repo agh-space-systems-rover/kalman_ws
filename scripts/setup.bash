@@ -10,6 +10,7 @@ if [ ! -f "/opt/ros/humble/lib/librmw_cyclonedds_cpp.so" ]; then
 fi
 # Enable Cyclone DDS.
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export CYCLONEDDS_URI="file://$_KALMAN_WS_ROOT/scripts/cyclone-dds.xml"
 
 # Include all other setup scripts.
 source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash

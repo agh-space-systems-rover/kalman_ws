@@ -26,6 +26,7 @@ kalm() {
 
 # Check if bash_completion is not configured.
 if [[ ! -f /etc/bash_completion.d/kalm ]]; then
+    echo "Installing bash completions..."
     sudo cp $_KALMAN_WS_ROOT/scripts/kalm.completion.bash /etc/bash_completion.d/kalm
     # (Shell must be restarted if the completion script is updated.)
 fi
