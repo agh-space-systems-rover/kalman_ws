@@ -1,0 +1,6 @@
+setup.py
+rosbridge_test_msgs/__init__.py
+rosbridge_test_msgs.egg-info/PKG-INFO
+rosbridge_test_msgs.egg-info/SOURCES.txt
+rosbridge_test_msgs.egg-info/dependency_links.txt
+rosbridge_test_msgs.egg-info/top_level.txt

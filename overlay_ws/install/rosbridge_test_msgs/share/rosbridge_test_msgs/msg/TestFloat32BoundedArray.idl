@@ -1,0 +1,13 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rosbridge_test_msgs/msg/TestFloat32BoundedArray.msg
+// generated code does not contain a copyright notice
+
+
+module rosbridge_test_msgs {
+  module msg {
+    typedef float float__16[16];
+    struct TestFloat32BoundedArray {
+      float__16 data;
+    };
+  };
+};

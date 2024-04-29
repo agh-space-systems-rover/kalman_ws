@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/Nodes.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct Nodes_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct Nodes_Response {
+      sequence<string> nodes;
+    };
+  };
+};

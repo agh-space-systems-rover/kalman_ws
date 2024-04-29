@@ -1,0 +1,3 @@
+source;share/rosbridge_library/environment/ament_prefix_path.sh
+source;share/rosbridge_library/environment/path.sh
+source;share/rosbridge_library/environment/pythonpath.sh

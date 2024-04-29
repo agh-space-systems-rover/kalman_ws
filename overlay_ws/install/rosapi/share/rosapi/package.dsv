@@ -1,0 +1,8 @@
+source;share/rosapi/hook/cmake_prefix_path.ps1
+source;share/rosapi/hook/cmake_prefix_path.dsv
+source;share/rosapi/hook/cmake_prefix_path.sh
+source;share/rosapi/local_setup.bash
+source;share/rosapi/local_setup.dsv
+source;share/rosapi/local_setup.ps1
+source;share/rosapi/local_setup.sh
+source;share/rosapi/local_setup.zsh

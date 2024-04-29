@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/GetParam.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct GetParam_Request {
+      string name;
+
+      string default_value;
+    };
+    struct GetParam_Response {
+      string value;
+    };
+  };
+};

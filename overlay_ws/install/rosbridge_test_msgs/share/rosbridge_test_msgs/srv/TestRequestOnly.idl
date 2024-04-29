@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosbridge_test_msgs/srv/TestRequestOnly.srv
+// generated code does not contain a copyright notice
+
+
+module rosbridge_test_msgs {
+  module srv {
+    struct TestRequestOnly_Request {
+      int32 data;
+    };
+    struct TestRequestOnly_Response {
+      uint8 structure_needs_at_least_one_member;
+    };
+  };
+};

@@ -1,0 +1,13 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rosbridge_msgs/msg/ConnectedClients.msg
+// generated code does not contain a copyright notice
+
+#include "rosbridge_msgs/msg/ConnectedClient.idl"
+
+module rosbridge_msgs {
+  module msg {
+    struct ConnectedClients {
+      sequence<rosbridge_msgs::msg::ConnectedClient> clients;
+    };
+  };
+};

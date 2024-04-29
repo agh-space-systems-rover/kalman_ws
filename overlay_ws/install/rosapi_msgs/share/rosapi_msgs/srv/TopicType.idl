@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/TopicType.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct TopicType_Request {
+      string topic;
+    };
+    struct TopicType_Response {
+      string type;
+    };
+  };
+};

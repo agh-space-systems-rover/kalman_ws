@@ -1,0 +1,11 @@
+from rosbridge_test_msgs.msg._num import Num  # noqa: F401
+from rosbridge_test_msgs.msg._test_char import TestChar  # noqa: F401
+from rosbridge_test_msgs.msg._test_duration_array import TestDurationArray  # noqa: F401
+from rosbridge_test_msgs.msg._test_float32_array import TestFloat32Array  # noqa: F401
+from rosbridge_test_msgs.msg._test_float32_bounded_array import TestFloat32BoundedArray  # noqa: F401
+from rosbridge_test_msgs.msg._test_header import TestHeader  # noqa: F401
+from rosbridge_test_msgs.msg._test_header_array import TestHeaderArray  # noqa: F401
+from rosbridge_test_msgs.msg._test_header_two import TestHeaderTwo  # noqa: F401
+from rosbridge_test_msgs.msg._test_time_array import TestTimeArray  # noqa: F401
+from rosbridge_test_msgs.msg._test_u_int8 import TestUInt8  # noqa: F401
+from rosbridge_test_msgs.msg._test_u_int8_fixed_size_array16 import TestUInt8FixedSizeArray16  # noqa: F401

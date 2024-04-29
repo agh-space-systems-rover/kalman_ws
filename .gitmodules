@@ -10,3 +10,6 @@
 [submodule "overlay_ws/realsense-ros"]
 	path = overlay_ws/src/realsense-ros
 	url = git@github.com:IntelRealSense/realsense-ros.git
+[submodule "overlay_ws/src/rosbridge_suite"]
+	path = overlay_ws/src/rosbridge_suite
+	url = git@github.com:RobotWebTools/rosbridge_suite.git

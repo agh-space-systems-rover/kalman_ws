@@ -1,0 +1,8 @@
+setup.py
+rosbridge_server/__init__.py
+rosbridge_server/client_manager.py
+rosbridge_server/websocket_handler.py
+rosbridge_server.egg-info/PKG-INFO
+rosbridge_server.egg-info/SOURCES.txt
+rosbridge_server.egg-info/dependency_links.txt
+rosbridge_server.egg-info/top_level.txt

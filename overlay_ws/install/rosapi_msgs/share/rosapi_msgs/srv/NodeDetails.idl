@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/NodeDetails.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct NodeDetails_Request {
+      string node;
+    };
+    struct NodeDetails_Response {
+      sequence<string> subscribing;
+
+      sequence<string> publishing;
+
+      sequence<string> services;
+    };
+  };
+};

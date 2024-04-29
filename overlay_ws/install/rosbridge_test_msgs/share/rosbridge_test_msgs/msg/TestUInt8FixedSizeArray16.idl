@@ -1,0 +1,13 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rosbridge_test_msgs/msg/TestUInt8FixedSizeArray16.msg
+// generated code does not contain a copyright notice
+
+
+module rosbridge_test_msgs {
+  module msg {
+    typedef uint8 uint8__16[16];
+    struct TestUInt8FixedSizeArray16 {
+      uint8__16 data;
+    };
+  };
+};

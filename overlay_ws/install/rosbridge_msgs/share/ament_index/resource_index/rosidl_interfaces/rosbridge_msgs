@@ -1,0 +1,4 @@
+msg/ConnectedClient.idl
+msg/ConnectedClient.msg
+msg/ConnectedClients.idl
+msg/ConnectedClients.msg

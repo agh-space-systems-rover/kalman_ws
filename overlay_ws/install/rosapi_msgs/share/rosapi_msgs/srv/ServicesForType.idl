@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/ServicesForType.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct ServicesForType_Request {
+      string type;
+    };
+    struct ServicesForType_Response {
+      sequence<string> services;
+    };
+  };
+};

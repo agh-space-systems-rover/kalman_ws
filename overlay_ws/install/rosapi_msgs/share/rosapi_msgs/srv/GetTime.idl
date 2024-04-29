@@ -1,0 +1,16 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/GetTime.srv
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module rosapi_msgs {
+  module srv {
+    struct GetTime_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct GetTime_Response {
+      builtin_interfaces::msg::Time time;
+    };
+  };
+};

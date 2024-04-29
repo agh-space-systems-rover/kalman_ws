@@ -1,0 +1,12 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rosbridge_test_msgs/msg/TestFloat32Array.msg
+// generated code does not contain a copyright notice
+
+
+module rosbridge_test_msgs {
+  module msg {
+    struct TestFloat32Array {
+      sequence<float> data;
+    };
+  };
+};

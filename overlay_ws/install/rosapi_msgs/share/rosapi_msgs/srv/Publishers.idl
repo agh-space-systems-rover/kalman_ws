@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/Publishers.srv
+// generated code does not contain a copyright notice
+
+
+module rosapi_msgs {
+  module srv {
+    struct Publishers_Request {
+      string topic;
+    };
+    struct Publishers_Response {
+      sequence<string> publishers;
+    };
+  };
+};

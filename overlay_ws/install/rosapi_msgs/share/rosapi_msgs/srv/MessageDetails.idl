@@ -1,0 +1,16 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosapi_msgs/srv/MessageDetails.srv
+// generated code does not contain a copyright notice
+
+#include "rosapi_msgs/msg/TypeDef.idl"
+
+module rosapi_msgs {
+  module srv {
+    struct MessageDetails_Request {
+      string type;
+    };
+    struct MessageDetails_Response {
+      sequence<rosapi_msgs::msg::TypeDef> typedefs;
+    };
+  };
+};

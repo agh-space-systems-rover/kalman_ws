@@ -1,0 +1,21 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosbridge_test_msgs/srv/TestNestedService.srv
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Pose.idl"
+#include "std_msgs/msg/Float64.idl"
+
+module rosbridge_test_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "request definition")
+    struct TestNestedService_Request {
+      geometry_msgs::msg::Pose pose;
+    };
+    @verbatim (language="comment", text=
+      "response definition")
+    struct TestNestedService_Response {
+      std_msgs::msg::Float64 data;
+    };
+  };
+};

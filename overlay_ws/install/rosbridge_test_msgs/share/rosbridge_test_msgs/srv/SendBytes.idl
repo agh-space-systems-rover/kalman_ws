@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rosbridge_test_msgs/srv/SendBytes.srv
+// generated code does not contain a copyright notice
+
+
+module rosbridge_test_msgs {
+  module srv {
+    struct SendBytes_Request {
+      int64 count;
+    };
+    struct SendBytes_Response {
+      string data;
+    };
+  };
+};

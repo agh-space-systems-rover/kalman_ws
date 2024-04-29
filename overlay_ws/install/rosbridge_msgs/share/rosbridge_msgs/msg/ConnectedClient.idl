@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rosbridge_msgs/msg/ConnectedClient.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module rosbridge_msgs {
+  module msg {
+    struct ConnectedClient {
+      string ip_address;
+
+      builtin_interfaces::msg::Time connection_time;
+    };
+  };
+};

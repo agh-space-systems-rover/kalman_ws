@@ -1,0 +1,1 @@
+rclpy;python3-pil;rosidl_default_runtime;python3-bson;rosbridge_test_msgs;actionlib_msgs;ament_cmake_pytest;builtin_interfaces;diagnostic_msgs;example_interfaces;control_msgs;geometry_msgs;nav_msgs;sensor_msgs;std_msgs;std_srvs;stereo_msgs;tf2_msgs;trajectory_msgs;visualization_msgs

@@ -1,0 +1,2 @@
+source;share/rosbridge_suite/environment/ament_prefix_path.sh
+source;share/rosbridge_suite/environment/path.sh
