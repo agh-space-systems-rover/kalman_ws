@@ -12,6 +12,12 @@ fi
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI="file://$_KALMAN_WS_ROOT/scripts/cyclone-dds.xml"
 
+# Enable NodeJS v20 repo.
+if [ ! -f "/etc/apt/sources.list.d/nodesource.list" ]; then
+    echo "NodeJS v20 repo is not installed. Installing..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+fi
+
 # Include all other setup scripts.
 source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash
