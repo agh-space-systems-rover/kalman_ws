@@ -47,6 +47,14 @@ build() {
     pkg_names=$(echo $pkg_names | sed 's/^ //')
     pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
+    # If no packages are found, show an error message and return.
+    if [ -z "$pkg_names" ]; then
+        echo "The query did not match any packages."
+        cd $prev_dir
+        unset prev_dir
+        return
+    fi
+
     # Display which packages will be built if filtering is used.
     if [ $selected_packages = true ]; then
         echo "Packages to build:"
@@ -179,7 +187,9 @@ clean() {
     pkg_info=($pkg_info)
     pkg_names=""
     pkg_paths=""
+    selected_packages=false
     if [ $# -ne 0 ]; then
+        selected_packages=true
         queries="$@"
         for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
             name=${pkg_info[$i]}
@@ -192,19 +202,35 @@ clean() {
                 fi
             done
         done
+    else
+        # If no arguments are provided, clean all packages.
+        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
+            name=${pkg_info[$i]}
+            path=${pkg_info[$i + 1]}
+            pkg_names="$pkg_names $name"
+            pkg_paths="$pkg_paths $path"
+        done
     fi
     pkg_names=$(echo $pkg_names | sed 's/^ //')
     pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
+    # If no packages are found, show an error message and return.
+    if [ -z "$pkg_names" ]; then
+        echo "The query did not match any packages."
+        cd $prev_dir
+        unset prev_dir
+        return
+    fi
+
     # Display which packages will be cleared if queries are used.
-    if [ ! -z "$pkg_names" ]; then
+    if [ $selected_packages = true ]; then
         echo "Packages to clean:"
         for pkg in $pkg_names; do
             echo '  -' $pkg
         done
     fi
 
-    if [ -z "$pkg_names" ]; then
+    if [ $selected_packages = false ]; then
         # If not arguments were provided, perform a full wipe.
         rm -rf $_KALMAN_WS_ROOT/build
         rm -rf $_KALMAN_WS_ROOT/install
