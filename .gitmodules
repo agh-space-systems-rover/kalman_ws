@@ -13,3 +13,6 @@
 [submodule "overlay_ws/src/compressed_depth_image_transport"]
 	path = overlay_ws/src/compressed_depth_image_transport
 	url = git@github.com:agh-space-systems-rover/compressed_depth_image_transport.git
+[submodule "overlay_ws/src/rtabmap_odom"]
+	path = overlay_ws/src/rtabmap_odom
+	url = git@github.com:agh-space-systems-rover/rtabmap_odom.git
