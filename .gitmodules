@@ -4,9 +4,6 @@
 [submodule "overlay_ws/src/spatio_temporal_voxel_layer"]
 	path = overlay_ws/src/spatio_temporal_voxel_layer
 	url = git@github.com:nachovizzo/spatio_temporal_voxel_layer.git
-[submodule "overlay_ws/ros_aruco_opencv"]
-	path = overlay_ws/src/ros_aruco_opencv
-	url = git@github.com:fictionlab/ros_aruco_opencv.git
 [submodule "overlay_ws/realsense-ros"]
 	path = overlay_ws/src/realsense-ros
 	url = git@github.com:IntelRealSense/realsense-ros.git

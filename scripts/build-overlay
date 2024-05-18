@@ -14,7 +14,7 @@ prev_dir=$(pwd)
 cd $overlay_dir
 
 # Build the workspace.
-MAKEFLAGS="-j 6" colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --allow-overriding aruco_opencv aruco_opencv_msgs compressed_depth_image_transport realsense2_camera realsense2_camera_msgs realsense2_description rtabmap_odom rosapi rosapi_msgs rosbridge_library rosbridge_msgs rosbridge_server rosbridge_suite rosbridge_test_msgs
+MAKEFLAGS="-j 6" colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3" --allow-overriding compressed_depth_image_transport realsense2_camera realsense2_camera_msgs realsense2_description rtabmap_odom rosapi rosapi_msgs rosbridge_library rosbridge_msgs rosbridge_server rosbridge_suite rosbridge_test_msgs
 
 # Copy OpenVDB libs to install directory.
 cp ./build/spatio_temporal_voxel_layer/openvdb/lib/libopenvdb.so ./install/spatio_temporal_voxel_layer/lib/

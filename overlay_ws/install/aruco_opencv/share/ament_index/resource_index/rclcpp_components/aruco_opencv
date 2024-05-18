@@ -1,2 +1,0 @@
-aruco_opencv::ArucoTracker;lib/libaruco_opencv.so
-aruco_opencv::ArucoTrackerAutostart;lib/libaruco_opencv.so
