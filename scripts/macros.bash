@@ -5,13 +5,6 @@ build() {
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-    # Verify if rosdep cache exists.
-    if [ ! -d "$HOME/.ros/rosdep" ]; then
-        # Update rosdep index.
-        echo "Updating rosdep index..."
-        rosdep update --rosdistro $ROS_DISTRO --default-yes
-    fi
-
     # Find packages to build.
     # If no arguments are provided, build all packages.
     pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')

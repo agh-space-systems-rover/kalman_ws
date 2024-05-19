@@ -22,3 +22,16 @@ fi
 source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash
 source $_KALMAN_WS_ROOT/scripts/kalm.bash
+
+# Verify that rosdep cache exists.
+if [ ! -d "$HOME/.ros/rosdep" ]; then
+    # Update rosdep index.
+    echo "Updating rosdep index..."
+    rosdep update --rosdistro $ROS_DISTRO --default-yes
+fi
+
+# Install overlay dependencies.
+if [ ! -f "$HOME/.kalman_ws_overlay_deps_installed" ]; then
+    echo "Installing overlay dependencies..."
+    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $_KALMAN_WS_ROOT/overlay_ws/src && touch $HOME/.kalman_ws_overlay_deps_installed
+fi
