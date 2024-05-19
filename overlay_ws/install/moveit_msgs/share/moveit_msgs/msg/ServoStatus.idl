@@ -1,0 +1,32 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from moveit_msgs/msg/ServoStatus.msg
+// generated code does not contain a copyright notice
+
+
+module moveit_msgs {
+  module msg {
+    module ServoStatus_Constants {
+      @verbatim (language="comment", text=
+        "Status types (should reflect StatusCode from moveit_servo/utils/datatype.hpp)")
+      const int8 INVALID = -1;
+      const int8 NO_WARNING = 0;
+      const int8 DECELERATE_FOR_APPROACHING_SINGULARITY = 1;
+      const int8 HALT_FOR_SINGULARITY = 2;
+      const int8 DECELERATE_FOR_LEAVING_SINGULARITY = 3;
+      const int8 DECELERATE_FOR_COLLISION = 4;
+      const int8 HALT_FOR_COLLISION = 5;
+      const int8 JOINT_BOUND = 6;
+    };
+    @verbatim (language="comment", text=
+      "Message")
+    struct ServoStatus {
+      @verbatim (language="comment", text=
+        "will contains integer code")
+      int8 code;
+
+      @verbatim (language="comment", text=
+        "will contain explanatory message")
+      string message;
+    };
+  };
+};

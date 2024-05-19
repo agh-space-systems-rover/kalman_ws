@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from moveit_msgs/srv/GetGroupUrdf.srv
+// generated code does not contain a copyright notice
+
+#include "moveit_msgs/msg/MoveItErrorCodes.idl"
+
+module moveit_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Name of the planning group for which an URDF is requested")
+    struct GetGroupUrdf_Request {
+      string group_name;
+    };
+    @verbatim (language="comment", text=
+      "Whether an error occurred")
+    struct GetGroupUrdf_Response {
+      moveit_msgs::msg::MoveItErrorCodes error_code;
+
+      @verbatim (language="comment", text=
+        "URDF of the requested group. Empty if request was not successful e.g. because the group does not exist")
+      string urdf_string;
+    };
+  };
+};

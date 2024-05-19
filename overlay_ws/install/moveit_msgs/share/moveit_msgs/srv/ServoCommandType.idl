@@ -1,0 +1,26 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from moveit_msgs/srv/ServoCommandType.srv
+// generated code does not contain a copyright notice
+
+
+module moveit_msgs {
+  module srv {
+    module ServoCommandType_Request_Constants {
+      const int8 JOINT_JOG = 0;
+      const int8 TWIST = 1;
+      const int8 POSE = 2;
+    };
+    @verbatim (language="comment", text=
+      "Request constants")
+    struct ServoCommandType_Request {
+      @verbatim (language="comment", text=
+        "Request Field")
+      int8 command_type;
+    };
+    @verbatim (language="comment", text=
+      "Response Field")
+    struct ServoCommandType_Response {
+      boolean success;
+    };
+  };
+};

@@ -16,3 +16,6 @@
 [submodule "overlay_ws/src/rtabmap_odom"]
 	path = overlay_ws/src/rtabmap_odom
 	url = git@github.com:agh-space-systems-rover/rtabmap_odom.git
+[submodule "overlay_ws/src/moveit_msgs"]
+	path = overlay_ws/src/moveit_msgs
+	url = git@github.com:moveit/moveit_msgs.git
