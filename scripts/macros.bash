@@ -1,4 +1,4 @@
-# Included by ./.bashrc
+# Included by ./setup.bash
 
 # Executes colcon build in workspace.
 build() {
@@ -394,6 +394,15 @@ git-du() {
 
 # Resets all submodules to main and pulls any recent changes.
 reset-pull() {
+    # Display a warning Y/N prompt.
+    echo "This will reset all submodules to main and pull any recent changes. YOU WILL LOSE ALL LOCAL CHANGES."
+    read -p "Are you sure you want to continue? (Y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        return
+    fi
+    echo
+
     prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 

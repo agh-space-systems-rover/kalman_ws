@@ -5,6 +5,8 @@ source /opt/ros/humble/local_setup.bash
 # Source prebuilt overlay here.
 if [ -f "$_KALMAN_WS_ROOT/overlay_ws/install/local_setup.bash" ]; then
     source $_KALMAN_WS_ROOT/overlay_ws/install/local_setup.bash
+else
+    echo "Overlay ROS workspace was not found. Please ensure that kalman_ws/overlay_ws/install directory exists."
 fi
 
 # Source the development workspace setup script if available.
