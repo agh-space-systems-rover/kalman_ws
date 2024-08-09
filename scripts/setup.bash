@@ -23,7 +23,7 @@ source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash
 source $_KALMAN_WS_ROOT/scripts/kalm.bash
 
-# Verify that rosdep cache exists.
+# Make sure that rosdep cache exists.
 if [ ! -d "$HOME/.ros/rosdep" ]; then
     # Update rosdep index.
     echo "Updating rosdep index..."
