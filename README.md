@@ -42,7 +42,7 @@ To enter the accelerated ROS 2 shell, run this automated script:
 It will automatically build the Docker image if it is not present on your system.
 Then, using this image, a new distrobox will be created and you will be logged in automatically.
 
-After the initial setup of your container is done, you will be able to use ROS 2 and graphical tools such as Rviz and Gazebo.
+After the initial setup of your container is done, you will be able to use ROS 2 and graphical tools such as Rviz and Rqt.
 
 #### Building the Workspace
 
