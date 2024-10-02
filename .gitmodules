@@ -1,15 +1,3 @@
 [submodule "src/kalman_robot"]
 	path = src/kalman_robot
 	url = git@github.com:agh-space-systems-rover/kalman_robot.git
-[submodule "overlay_ws/src/rosbridge_suite"]
-	path = overlay_ws/src/rosbridge_suite
-	url = git@github.com:RobotWebTools/rosbridge_suite.git
-[submodule "overlay_ws/src/compressed_depth_image_transport"]
-	path = overlay_ws/src/compressed_depth_image_transport
-	url = git@github.com:agh-space-systems-rover/compressed_depth_image_transport.git
-[submodule "overlay_ws/src/rtabmap_odom"]
-	path = overlay_ws/src/rtabmap_odom
-	url = git@github.com:agh-space-systems-rover/rtabmap_odom.git
-[submodule "overlay_ws/src/moveit_msgs"]
-	path = overlay_ws/src/moveit_msgs
-	url = git@github.com:moveit/moveit_msgs.git

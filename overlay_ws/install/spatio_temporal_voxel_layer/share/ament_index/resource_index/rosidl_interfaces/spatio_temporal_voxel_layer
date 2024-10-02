@@ -1,4 +1,0 @@
-srv/SaveGrid.idl
-srv/SaveGrid.srv
-srv/SaveGrid_Request.msg
-srv/SaveGrid_Response.msg

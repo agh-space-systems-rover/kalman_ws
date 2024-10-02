@@ -86,7 +86,6 @@ See: [macros.bash](/scripts/macros.bash)
 ├─ build/                 # ROS 2 build artifacts (ignored)
 ├─ install/               # ROS 2 install artifacts (ignored)
 ├─ log/                   # ROS 2 runtime artifacts (ignored)
-├─ overlay_ws/            # An additional pre-built workspace to be overlayed under this one.
 ├─ scripts/               # The implementation of the workspace
 │  ├─ .bashrc             # Kalman dev env Bash overlay; Can be sourced both from Distrobox or from a standalone system.
 │  ├─ configure_vscode.py # Visual Studio auto-complete configuration script; called from macros.bash

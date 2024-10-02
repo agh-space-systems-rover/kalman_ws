@@ -1,8 +1,0 @@
-setup.py
-spatio_temporal_voxel_layer/__init__.py
-spatio_temporal_voxel_layer.egg-info/PKG-INFO
-spatio_temporal_voxel_layer.egg-info/SOURCES.txt
-spatio_temporal_voxel_layer.egg-info/dependency_links.txt
-spatio_temporal_voxel_layer.egg-info/top_level.txt
-spatio_temporal_voxel_layer/srv/__init__.py
-spatio_temporal_voxel_layer/srv/_save_grid.py

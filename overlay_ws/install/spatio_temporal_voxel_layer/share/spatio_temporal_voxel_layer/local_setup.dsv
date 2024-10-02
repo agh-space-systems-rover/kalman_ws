@@ -1,4 +1,0 @@
-source;share/spatio_temporal_voxel_layer/environment/ament_prefix_path.sh
-source;share/spatio_temporal_voxel_layer/environment/library_path.sh
-source;share/spatio_temporal_voxel_layer/environment/path.sh
-source;share/spatio_temporal_voxel_layer/environment/pythonpath.sh

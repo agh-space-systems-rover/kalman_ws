@@ -1,3 +1,0 @@
-
-# Response Field
-bool success
