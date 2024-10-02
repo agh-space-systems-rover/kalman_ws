@@ -14,7 +14,7 @@ if ! command -v flatpak &> /dev/null; then
         sudo apt-get update
         sudo apt-get install -y flatpak
     elif command -v pacman &> /dev/null; then
-        sudo pacman -S flatpak
+        sudo pacman -S --noconfirm flatpak
     elif command -v dnf &> /dev/null; then
         sudo dnf install -y flatpak
     else
