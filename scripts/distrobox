@@ -27,6 +27,9 @@ if ! command -v flatpak &> /dev/null; then
     fi
 fi
 
+# Force Docker in Distrobox.
+export DBX_CONTAINER_MANAGER=docker
+
 # Check if Distrobox home doesn't exist.
 # This is much faster than checking if the Distrobox instance exists.
 if [[ ! -d $distrobox_home ]]; then
