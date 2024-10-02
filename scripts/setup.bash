@@ -30,12 +30,3 @@ if [ ! -d "$HOME/.ros/rosdep" ]; then
     echo "Updating rosdep index..."
     rosdep update --rosdistro $ROS_DISTRO --default-yes
 fi
-
-# Install overlay dependencies.
-# marker_file="$HOME/.kalman_ws_overlay_deps_installed"
-marker_file="$HOME/.cache/kalman_ws/overlay_deps_installed.txt"
-if [ ! -f "$marker_file" ]; then
-    echo "Installing overlay dependencies..."
-    mkdir -p $(dirname $marker_file)
-    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $_KALMAN_WS_ROOT/overlay_ws/src && echo "Existence of this file indicates that the ROS dependencies of packages in overlay_ws have been successfully installed." > $marker_file
-fi
