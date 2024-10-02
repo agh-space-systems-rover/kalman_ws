@@ -63,8 +63,15 @@ if [[ ! -d $distrobox_home ]]; then
     ln -s $HOME/.gitconfig $distrobox_home/.gitconfig
     ln -s $HOME/.ssh $distrobox_home/.ssh
 
+    # Detect if the computer has an NVIDIA GPU.
+    if [[ $(lspci | grep -i nvidia | wc -l) -ne 0 ]]; then
+        nvidia="--nvidia"
+    else
+        nvidia=""
+    fi
+
     # Create the Distrobox.
-    distrobox create --image kalman_ws:ros2 --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --nvidia --no-entry
+    distrobox create --image kalman_ws:ros2 --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --no-entry --absolutely-disable-root-password-i-am-really-positively-sure $nvidia
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
         exit 1
