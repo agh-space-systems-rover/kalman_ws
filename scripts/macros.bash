@@ -2,49 +2,26 @@
 
 # Executes colcon build in workspace.
 build() {
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
-
-    # Find packages to build.
+    
+    # Select packages to build.
     # If no arguments are provided, build all packages.
-    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
-    pkg_info=($pkg_info)
-    pkg_names=""
-    pkg_paths=""
-    selected_packages=false
-    # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
+    local pkg_names=""
+    local pkg_paths=""
+    while IFS=: read -r name path; do
+        pkg_names="$pkg_names $name"
+        pkg_paths="$pkg_paths $path"
+    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@")
+    local selected_packages=false
     if [ $# -ne 0 ]; then
-        # If arguments are provided, build only those packages whose names contain any of the provided queries.
         selected_packages=true
-        queries="$@"
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            for query in $queries; do
-                if [[ $name == *"$query"* ]]; then
-                    pkg_names="$pkg_names $name"
-                    pkg_paths="$pkg_paths $path"
-                    break
-                fi
-            done
-        done
-    else
-        # If no arguments are provided, build all packages.
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            pkg_names="$pkg_names $name"
-            pkg_paths="$pkg_paths $path"
-        done
     fi
-    pkg_names=$(echo $pkg_names | sed 's/^ //')
-    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
-    # If no packages are found, show an error message and return.
+    # If no packages are found, show an error messeage and return.
     if [ -z "$pkg_names" ]; then
         echo "The query did not match any packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -58,19 +35,10 @@ build() {
     
     # Install rosdep dependencies.
     echo "Installing dependencies..."
-    if [ $selected_packages = false ]; then
-        # If no packages are selected, install dependencies for all packages.
-        rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths src
-    else
-        # If packages are selected, install dependencies for those packages only.
-        rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
-    fi
-
-    # Check if rosdep install was successful.
+    rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
     if [ $? -ne 0 ]; then
         echo "Failed to install rosdep dependencies."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -79,32 +47,41 @@ build() {
     # Use colcon to list packages and paths to them.
     # Then check if apt_packages.txt exists in each path.
     # If it does, install the packages using apt.
-    echo "Installing custom APT dependencies..."
-    installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
-    for pkg_path in $pkg_paths; do
-        if [ -f "$pkg_path/apt_packages.txt" ]; then
-            # Read apt_packages.txt.
-            apt_ids=$(cat $pkg_path/apt_packages.txt)
-            # For each package name, check if it is installed.
-            # If not, install it.
-            for apt_id in $apt_ids; do
-                # Check if apt_id is in installed_apt_ids.
-                # installed_apt_ids="package-1 package-2 ..."
-                if [[ $installed_apt_ids != *"$apt_id"* ]]; then
-                    echo "Installing $apt_id..."
-                    sudo apt install -y $apt_id
 
-                    # Check if installation was successful.
-                    if [ $? -ne 0 ]; then
-                        echo "Failed to install $apt_id."
-                        cd $prev_dir
-                        unset prev_dir
-                        return
+    latest_packages_txt_modified=$(find $pkg_paths -name apt_packages.txt -exec stat -c %Y {} \; | sort -n | tail -n 1)
+
+    if [ -f $HOME/.cache/kalman_ws/.last_apt_install ]; then
+        last_install_time=$(cat $HOME/.cache/kalman_ws/.last_apt_install)
+    else
+        last_install_time=0
+    fi
+
+    if [ $latest_packages_txt_modified -gt $last_install_time ]; then
+        echo "Installing custom APT dependencies..."
+        installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
+        for pkg_path in $pkg_paths; do
+            if [ -f "$pkg_path/apt_packages.txt" ]; then
+                # Read apt_packages.txt.
+                apt_ids=$(cat $pkg_path/apt_packages.txt)
+                # For each package name, check if it is installed.
+                # If not, install it.
+                for apt_id in $apt_ids; do
+                    # Check if apt_id is in installed_apt_ids.
+                    # installed_apt_ids="package-1 package-2 ..."
+                    if [[ $installed_apt_ids != *"$apt_id"* ]]; then
+                        echo "Installing $apt_id..."
+                        sudo apt install -y $apt_id
+                        if [ $? -ne 0 ]; then
+                            echo "Failed to install $apt_id."
+                            cd $prev_dir
+                            return
+                        fi
                     fi
-                fi
-            done
-        fi
-    done
+                done
+            fi
+        done
+        echo $latest_packages_txt_modified > $HOME/.cache/kalman_ws/.last_apt_install
+    fi
 
     # Install additional PIP dependencies.
     # Those are located in the requirements.txt file in each package.
@@ -126,12 +103,9 @@ build() {
                 if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
                     echo "Installing $pip_id..."
                     pip install $pip_id
-
-                    # Check if installation was successful.
                     if [ $? -ne 0 ]; then
                         echo "Failed to install $pip_id."
                         cd $prev_dir
-                        unset prev_dir
                         return
                     fi
                 fi
@@ -141,17 +115,10 @@ build() {
 
     # Build the workspace.
     echo "Building packages..."
-    if [ $selected_packages = false ]; then
-        # If no packages are selected, build all packages.
-        colcon build --symlink-install --base-paths src --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    else
-        # If packages are selected, build only those packages.
-        colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    fi
+    colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --allow-overriding $pkg_names
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -165,7 +132,6 @@ build() {
     echo "Done building packages."
 
     cd $prev_dir
-    unset prev_dir
 }
 
 # Removes build artifacts in workspace.
@@ -211,7 +177,6 @@ clean() {
     if [ -z "$pkg_names" ]; then
         echo "The query did not match any packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -242,7 +207,6 @@ clean() {
     source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
     cd $prev_dir
-    unset prev_dir
 
     echo "Done cleaning."
 }
@@ -298,7 +262,6 @@ format() {
     fi
 
     cd $prev_dir
-    unset prev_dir
 }
 
 # Runs Colcon tests and linters in the workspace.
@@ -337,7 +300,6 @@ lint() {
     if [ ! -d "build" ]; then
         echo "Workspace has not been built yet. Run 'build' first."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -351,7 +313,6 @@ lint() {
     # TODO: Somethow detect test failure and provide results for only the selected packages.
 
     cd $prev_dir
-    unset prev_dir
 }
 
 # Finds the largest objects current Git repository.
@@ -424,7 +385,6 @@ reset-pull() {
         if [ $? -ne 0 ]; then
             echo "Failed to checkout on main:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -439,7 +399,6 @@ reset-pull() {
         if [ $? -ne 0 ]; then
             echo "Failed to reset to origin/main:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -454,7 +413,6 @@ reset-pull() {
         if [ $? -ne 0 ]; then
             echo "Failed to pull changes:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -471,61 +429,4 @@ reset-pull() {
     done
 
     cd $prev_dir
-    unset prev_dir
 }
-
-# # Pushes changes in each repository.
-# # Will automatically commit if needed.
-# # Will ask for the commit message.
-# push() {
-#     prev_dir=$(pwd)
-#     cd $_KALMAN_WS_ROOT
-
-#     # Find all repositories.
-#     REPOS=$(find . -type d -name .git -execdir pwd \;)
-
-#     # Push all repositories.
-#     for REPO in $REPOS; do
-#         # Check if there are changes.
-#         cd $REPO
-#         git diff-index --quiet HEAD --
-#         if [ $? -ne 0 ]; then
-#             # Changes exist.
-#             echo "There are uncommitted changes in $REPO."
-
-#             # Ask for the commit message.
-#             echo "Commit message:"
-#             read COMMIT_MESSAGE
-
-#             # Ask for optional branch name (default to current branch).
-#             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-#             echo "Create new branch? Name (leave empty for current branch):"
-#             read BRANCH_NAME
-#             if [ ! -z "$BRANCH_NAME" ]; then
-#                 # Try to create the branch.
-#                 git checkout -b $BRANCH_NAME
-#                 if [ $? -ne 0 ]; then
-#                     echo "Failed to create branch $BRANCH_NAME."
-#                     cd $prev_dir
-#                     unset prev_dir
-#                     return
-#                 fi
-#             fi
-
-#             # Commit changes.
-#             git add .
-#             git commit -m "$COMMIT_MESSAGE"
-#             if [ $? -ne 0 ]; then
-#                 echo "Failed to commit changes."
-#                 cd $prev_dir
-#                 unset prev_dir
-#                 return
-#             fi
-#             git push --set-upstream origin $BRANCH_NAME
-
-#         fi
-#     done
-
-#     cd $prev_dir
-#     unset prev_dir
-# }
