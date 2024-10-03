@@ -58,9 +58,16 @@ if __name__ == "__main__":
         if not queries or any(query in pkg_name.lower() for query in queries):
             selected_pkgs.add(pkg_name)
 
+    # Recursively add dependencies of selected packages.
     pkgs_to_build = selected_pkgs.copy()
-    for pkg in selected_pkgs:
-        pkgs_to_build.update(read_pkg_deps(src_pkg_paths, pkg))
+    pkgs_to_discover = pkgs_to_build.copy()
+    while True:
+        prev_pkgs_to_build = pkgs_to_build.copy()
+        for pkg in pkgs_to_discover:
+            pkgs_to_build.update(read_pkg_deps(src_pkg_paths, pkg))
+        pkgs_to_discover = pkgs_to_build - prev_pkgs_to_build
+        if not pkgs_to_discover:
+            break
 
     # Print names and then paths of selected packages.
     for pkg in pkgs_to_build:
