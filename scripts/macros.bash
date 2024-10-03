@@ -33,17 +33,8 @@ build() {
         done
     fi
     
-    # Install rosdep dependencies.
-    local latest_package_xml_modified=$(find $pkg_paths -maxdepth 1 -name package.xml -exec stat -c %Y {} \; | sort -n | tail -n 1)
-    if [ -z "$latest_package_xml_modified" ]; then
-        latest_package_xml_modified=0
-    fi
-    if [ -f $HOME/.cache/kalman_ws/.last_rosdep_install ]; then
-        local last_rosdep_install_time=$(cat $HOME/.cache/kalman_ws/.last_rosdep_install)
-    else
-        local last_rosdep_install_time=0
-    fi
-    if [ $latest_package_xml_modified -gt $last_rosdep_install_time ]; then
+    local can_skip_rosdep_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=rosdep_mod_times.json --trigger-file=package.xml $pkg_paths)
+    if [ -n "$can_skip_rosdep_json" ]; then
         echo "Installing rosdep dependencies..."
         rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
         if [ $? -ne 0 ]; then
@@ -51,21 +42,14 @@ build() {
             cd $prev_dir
             return
         fi
-        echo $latest_package_xml_modified > $HOME/.cache/kalman_ws/.last_rosdep_install
+        # Update marker file.
+        echo "$can_skip_rosdep_json" > $HOME/.cache/kalman_ws/rosdep_mod_times.json
     fi
 
     # Install additional APT dependencies.
     # Those are located in the apt_packages.txt file in each package.
-    local latest_packages_txt_modified=$(find $pkg_paths -maxdepth 1 -name apt_packages.txt -exec stat -c %Y {} \; | sort -n | tail -n 1)
-    if [ -z "$latest_packages_txt_modified" ]; then
-        latest_packages_txt_modified=0
-    fi
-    if [ -f $HOME/.cache/kalman_ws/.last_apt_install ]; then
-        local last_apt_install_time=$(cat $HOME/.cache/kalman_ws/.last_apt_install)
-    else
-        local last_apt_install_time=0
-    fi
-    if [ $latest_packages_txt_modified -gt $last_apt_install_time ]; then
+    local can_skip_apt_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=apt_mod_times.json --trigger-file=apt_packages.txt $pkg_paths)
+    if [ -n "$can_skip_apt_json" ]; then
         echo "Installing custom APT dependencies..."
         local installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
         for pkg_path in $pkg_paths; do
@@ -89,21 +73,13 @@ build() {
                 done
             fi
         done
-        echo $latest_packages_txt_modified > $HOME/.cache/kalman_ws/.last_apt_install
+        echo "$can_skip_apt_txt" > $HOME/.cache/kalman_ws/apt_mod_times.json
     fi
 
     # Install additional PIP dependencies.
     # Those are located in the requirements.txt file in each package.
-    local latest_requirements_txt_modified=$(find $pkg_paths -maxdepth 1 -name requirements.txt -exec stat -c %Y {} \; | sort -n | tail -n 1)
-    if [ -z "$latest_requirements_txt_modified" ]; then
-        latest_requirements_txt_modified=0
-    fi
-    if [ -f $HOME/.cache/kalman_ws/.last_pip_install ]; then
-        local last_pip_install_time=$(cat $HOME/.cache/kalman_ws/.last_pip_install)
-    else
-        local last_pip_install_time=0
-    fi
-    if [ $latest_requirements_txt_modified -gt $last_pip_install_time ]; then
+    local can_skip_pipe_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=pip_mod_times.json --trigger-file=requirements.txt $pkg_paths)
+    if [ -n "$can_skip_pipe_json" ]; then
         echo "Installing custom PIP dependencies..."
         local installed_pip_ids=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
         for pkg_path in $pkg_paths; do
@@ -128,7 +104,7 @@ build() {
                 done
             fi
         done
-        echo $latest_requirements_txt_modified > $HOME/.cache/kalman_ws/.last_pip_install
+        echo "$can_skip_pipe_json" > $HOME/.cache/kalman_ws/pip_mod_times.json
     fi
 
     # Build the workspace.
@@ -140,12 +116,12 @@ build() {
         return
     fi
 
-    # Source setup scripts.
-    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
-
     # Load .vscode/settings.json.
     echo "Updating Visual Studio Code settings..."
     python3 $_KALMAN_WS_ROOT/scripts/configure_vscode.py
+
+    # Source setup scripts.
+    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
     echo "Done."
     cd $prev_dir
