@@ -6,7 +6,6 @@ export _KALMAN_WS_ROOT=$(realpath $(dirname $BASH_SOURCE)/..)
 # Use this: /opt/ros/humble/lib/librmw_cyclonedds_cpp.so
 if [ ! -f "/opt/ros/humble/lib/librmw_cyclonedds_cpp.so" ]; then
     echo "Cyclone DDS is not installed. Installing..."
-    sudo apt-get update
     sudo apt-get install -y ros-humble-rmw-cyclonedds-cpp
 fi
 # Enable Cyclone DDS.
