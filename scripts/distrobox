@@ -54,12 +54,12 @@ if [[ ! -d $distrobox_home ]]; then
     fi
 
     # Check if Docker image exists.
-    if [[ "$(docker images -q kalman_ws:ros2 2> /dev/null)" == "" ]]; then
+    if [[ "$(docker images -q kalman_ws:latest 2> /dev/null)" == "" ]]; then
         echo "Building Docker image..."
 
         # Build the Docker image
         # DOCKER_BUILDKIT=1 is required to suppress deprecation warnings.
-        DOCKER_BUILDKIT=1 docker build --tag kalman_ws:ros2 $script_dir
+        DOCKER_BUILDKIT=1 docker build --tag kalman_ws:latest $script_dir
         if [[ $? -ne 0 ]]; then
             echo "Failed to build Docker image."
             exit 1
@@ -84,7 +84,7 @@ if [[ ! -d $distrobox_home ]]; then
     fi
 
     # Create the Distrobox.
-    distrobox create --image kalman_ws:ros2 --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER" --no-entry --absolutely-disable-root-password-i-am-really-positively-sure $nvidia
+    distrobox create --image kalman_ws:latest --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER && yes | sudo unminimize" --no-entry --absolutely-disable-root-password-i-am-really-positively-sure $nvidia
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
         exit 1
