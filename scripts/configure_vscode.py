@@ -6,6 +6,9 @@ import os, shutil, json, glob
 
 
 def copy_if_updated(from_dir: str, to_dir: str):
+    if from_dir is None or to_dir is None:
+        return
+
     if os.path.isdir(from_dir) and os.path.isdir(to_dir):
         from_mtime = os.path.getmtime(from_dir)
         to_mtime = os.path.getmtime(to_dir)
@@ -27,6 +30,12 @@ def copy_if_updated(from_dir: str, to_dir: str):
         shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
 
 
+def elem(arr, index, default=None):
+    if index < len(arr):
+        return arr[index]
+    return default
+
+
 ws_dir = os.path.normpath(os.path.dirname(__file__) + "/..")
 config_path = os.path.join(ws_dir, ".vscode/settings.json")
 
@@ -39,22 +48,28 @@ usr_lib_python_dirs = []
 # If needed, copy ROS 2 site-packages and dist-packages to ~ for auto-complete on the host.
 running_distrobox = "DISTROBOX_HOST_HOME" in os.environ
 if running_distrobox:
-    copy_if_updated(glob.glob("/opt/ros/*/lib/python*/site-packages")[0], site_dir)
     copy_if_updated(
-        glob.glob("/opt/ros/*/local/lib/python*/dist-packages")[0], dist_dir
+        elem(glob.glob("/opt/ros/*/lib/python*/site-packages"), 0), site_dir
+    )
+    copy_if_updated(
+        elem(glob.glob("/opt/ros/*/local/lib/python*/dist-packages"), 0), dist_dir
     )
     # Also copy C++ headers.
-    copy_if_updated(glob.glob("/opt/ros/*/include")[0], include_dir)
+    copy_if_updated(elem(glob.glob("/opt/ros/*/include"), 0), include_dir)
     copy_if_updated("/usr/include", usr_include_dir)
     # Copy Python packages.
     for python_dir in glob.glob("/usr/lib/python*/dist-packages"):
         python_name = os.path.basename(os.path.dirname(python_dir))
-        usr_python_dir = os.path.expanduser(f"~/.vscode-paths/usr-lib-{python_name}-dist-packages")
+        usr_python_dir = os.path.expanduser(
+            f"~/.vscode-paths/usr-lib-{python_name}-dist-packages"
+        )
         copy_if_updated(python_dir, usr_python_dir)
         usr_lib_python_dirs.append(usr_python_dir)
     for python_dir in glob.glob("/usr/local/lib/python*/dist-packages"):
         python_name = os.path.basename(os.path.dirname(python_dir))
-        usr_python_dir = os.path.expanduser(f"~/.vscode-paths/usr-local-lib-{python_name}-dist-packages")
+        usr_python_dir = os.path.expanduser(
+            f"~/.vscode-paths/usr-local-lib-{python_name}-dist-packages"
+        )
         copy_if_updated(python_dir, usr_python_dir)
         usr_lib_python_dirs.append(usr_python_dir)
     # site-packages is normally not present in /usr/lib
@@ -73,13 +88,18 @@ if running_distrobox:
     }
 else:
     config["terminal.integrated.profiles.linux"] = {
-        "kalman_ws": {"path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/native-ubuntu.bashrc"}
+        "kalman_ws": {
+            "path": f"/usr/bin/bash --rcfile {ws_dir}/scripts/native-ubuntu.bashrc"
+        }
     }
 config["terminal.integrated.defaultProfile.linux"] = "kalman_ws"
 
 # Reset paths.
 if running_distrobox:
-    config["python.autoComplete.extraPaths"] = [site_dir, dist_dir] + usr_lib_python_dirs
+    config["python.autoComplete.extraPaths"] = [
+        site_dir,
+        dist_dir,
+    ] + usr_lib_python_dirs
     config["C_Cpp.default.includePath"] = [include_dir + "/**", usr_include_dir + "/**"]
 else:
     config["python.autoComplete.extraPaths"] = []

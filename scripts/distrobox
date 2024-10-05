@@ -2,6 +2,9 @@
 
 # This script creates a new Distrobox or enters an existing one.
 
+ros_distro=jazzy
+additional_packages="unminimize iputils-ping nano vim alsa-utils alsa pulseaudio git git-man python3 python-is-python3 python3-pip"
+
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 ws_dir="$(cd "$script_dir/.." && pwd)"
 distrobox_home="$ws_dir/.distrobox"
@@ -29,9 +32,6 @@ if ! command -v flatpak &> /dev/null; then
     fi
 fi
 
-# Force Docker in Distrobox.
-export DBX_CONTAINER_MANAGER=docker
-
 # Check if Distrobox home doesn't exist.
 # This is much faster than checking if Distrobox instance doesn't exist.
 if [[ ! -d $distrobox_home ]]; then
@@ -53,19 +53,6 @@ if [[ ! -d $distrobox_home ]]; then
         distrobox rm --force kalman_ws
     fi
 
-    # Check if Docker image exists.
-    if [[ "$(docker images -q kalman_ws:latest 2> /dev/null)" == "" ]]; then
-        echo "Building Docker image..."
-
-        # Build the Docker image
-        # DOCKER_BUILDKIT=1 is required to suppress deprecation warnings.
-        DOCKER_BUILDKIT=1 docker build --tag kalman_ws:latest $script_dir
-        if [[ $? -ne 0 ]]; then
-            echo "Failed to build Docker image."
-            exit 1
-        fi
-    fi
-
     echo "Creating Distrobox instance..."
     
     # Suppress Ubuntu sudo babysitting.
@@ -84,7 +71,8 @@ if [[ ! -d $distrobox_home ]]; then
     fi
 
     # Create the Distrobox.
-    distrobox create --image kalman_ws:latest --name kalman_ws --home $distrobox_home --init-hooks "chsh -s /usr/bin/bash $USER && yes | sudo unminimize" --no-entry --absolutely-disable-root-password-i-am-really-positively-sure $nvidia
+    
+    distrobox create --image osrf/ros:$ros_distro-desktop-full --name kalman_ws --home "$distrobox_home" --additional-packages "$additional_packages" --absolutely-disable-root-password-i-am-really-positively-sure --init-hooks "chsh -s /usr/bin/bash $USER && (yes | sudo unminimize)" $nvidia --no-entry
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
         exit 1
