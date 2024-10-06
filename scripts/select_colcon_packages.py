@@ -60,14 +60,15 @@ if __name__ == "__main__":
 
     # Recursively add dependencies of selected packages.
     pkgs_to_build = selected_pkgs.copy()
-    pkgs_to_discover = pkgs_to_build.copy()
-    while True:
-        prev_pkgs_to_build = pkgs_to_build.copy()
-        for pkg in pkgs_to_discover:
-            pkgs_to_build.update(read_pkg_deps(src_pkg_paths, pkg))
-        pkgs_to_discover = pkgs_to_build - prev_pkgs_to_build
-        if not pkgs_to_discover:
-            break
+    if "kalman_ws_disable_recursive_dependencies_in_selection" not in queries:
+        pkgs_to_discover = pkgs_to_build.copy()
+        while True:
+            prev_pkgs_to_build = pkgs_to_build.copy()
+            for pkg in pkgs_to_discover:
+                pkgs_to_build.update(read_pkg_deps(src_pkg_paths, pkg))
+            pkgs_to_discover = pkgs_to_build - prev_pkgs_to_build
+            if not pkgs_to_discover:
+                break
 
     # Print names and then paths of selected packages.
     for pkg in pkgs_to_build:

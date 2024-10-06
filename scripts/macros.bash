@@ -141,7 +141,7 @@ clean() {
     while IFS=: read -r name path; do
         local pkg_names="$pkg_names $name"
         local pkg_paths="$pkg_paths $path"
-    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@")
+    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@" kalman_ws_disable_recursive_dependencies_in_selection)
     local selected_packages=false
     if [ $# -ne 0 ]; then
         local selected_packages=true
