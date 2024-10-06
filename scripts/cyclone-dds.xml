@@ -1,7 +1,15 @@
 <CycloneDDS>
   <Domain Id="any">
     <General>
+      <!-- <AllowMulticast>false</AllowMulticast> -->
       <AllowMulticast>spdp</AllowMulticast>
     </General>
+    <Discovery>
+        <!-- <Peers>
+            <Peer address="[IPV4-address]"/>
+        </Peers> -->
+        <ParticipantIndex>auto</ParticipantIndex>
+        <MaxAutoParticipantIndex>100</MaxAutoParticipantIndex>
+    </Discovery>
   </Domain>
 </CycloneDDS>

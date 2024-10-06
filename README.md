@@ -25,14 +25,6 @@ If you have already cloned without `--recurse-submodules`, use:
 git submodule update --init --recursive
 ```
 
-This repository includes `kalman_robot` repository as a submodule, but it might not always be up to date.
-Therefore, after your distrobox is ready, you should pull the latest changes from the remote repository:
-
-```bash
-cd src/kalman_robot
-git pull
-```
-
 ### Containerized Development
 
 To enter the accelerated ROS 2 shell, run this automated script:
@@ -46,11 +38,28 @@ After the initial setup of your container is done, you will be able to use ROS 2
 
 #### Building the Workspace
 
+This repository includes `kalman_robot` repository as a submodule, but it might not always be up to date.
+Therefore, after your distrobox is ready, you should pull the latest changes from the remote repository:
+
+```bash
+cd src/kalman_robot
+git pull
+cd ../..
+```
+
 Now you can build the workspace. `kalman_ws` provides a useful macro that can be used to automate this process. It can be typed right into the terminal:
+
+> [!WARNING]
+> `kalman_robot` builds some third-party C++ dependencies from source. By default Colcon allocates jobs without rescheduling them when memory usage approaches maximum. In turn your system may run out of memory while a build is running. To avoid this, create a swap file on your system as described in the [Troubleshooting](https://github.com/agh-space-systems-rover/kalman_robot#out-of-memory) section of `kalman_robot`'s README.
+
 ```bash
 build
 ```
-Running this command will install all rosdeps, build the workspace, source it, and configure Visual Studio Code for you.
+
+> [!IMPORTANT]
+> Selective builds are supported via `build meta_gs`, `build meta_pc`, `build meta_arm`, etc.
+
+Running this command will install all rosdeps, custom APT/PIP dependencies, build the workspace, source it, and configure Visual Studio Code for you.
 Visual Studio Code is configured by adding IntelliSense paths to `./.vscode/settings.json` and setting up a custom terminal profile, this ensures that every new terminal that you open within Visual Studio Code will automatically enter the distrobox so that you can develop on your host machine and seamlessly run the code in a container.
 
 After the workspace is built, please visit [kalman_robot](https://github.com/agh-space-systems-rover/kalman_robot) repository for instructions on how to start the robot.
@@ -86,7 +95,6 @@ See: [macros.bash](/scripts/macros.bash)
 ├─ build/                 # ROS 2 build artifacts (ignored)
 ├─ install/               # ROS 2 install artifacts (ignored)
 ├─ log/                   # ROS 2 runtime artifacts (ignored)
-├─ overlay_ws/            # An additional pre-built workspace to be overlayed under this one.
 ├─ scripts/               # The implementation of the workspace
 │  ├─ .bashrc             # Kalman dev env Bash overlay; Can be sourced both from Distrobox or from a standalone system.
 │  ├─ configure_vscode.py # Visual Studio auto-complete configuration script; called from macros.bash

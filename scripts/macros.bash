@@ -2,49 +2,26 @@
 
 # Executes colcon build in workspace.
 build() {
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
-
-    # Find packages to build.
+    
+    # Select packages to build.
     # If no arguments are provided, build all packages.
-    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
-    pkg_info=($pkg_info)
-    pkg_names=""
-    pkg_paths=""
-    selected_packages=false
-    # pkg_info format: "pkg1_name pkg1_path pkg2_name pkg2_path ..."
+    local pkg_names=""
+    local pkg_paths=""
+    while IFS=: read -r name path; do
+        local pkg_names="$pkg_names $name"
+        local pkg_paths="$pkg_paths $path"
+    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@")
+    local selected_packages=false
     if [ $# -ne 0 ]; then
-        # If arguments are provided, build only those packages whose names contain any of the provided queries.
-        selected_packages=true
-        queries="$@"
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            for query in $queries; do
-                if [[ $name == *"$query"* ]]; then
-                    pkg_names="$pkg_names $name"
-                    pkg_paths="$pkg_paths $path"
-                    break
-                fi
-            done
-        done
-    else
-        # If no arguments are provided, build all packages.
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            pkg_names="$pkg_names $name"
-            pkg_paths="$pkg_paths $path"
-        done
+        local selected_packages=true
     fi
-    pkg_names=$(echo $pkg_names | sed 's/^ //')
-    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
-    # If no packages are found, show an error message and return.
+    # If no packages are found, show an error messeage and return.
     if [ -z "$pkg_names" ]; then
         echo "The query did not match any packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -57,161 +34,123 @@ build() {
     fi
     
     # Install rosdep dependencies.
-    echo "Installing dependencies..."
-    if [ $selected_packages = false ]; then
-        # If no packages are selected, install dependencies for all packages.
-        rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths src
-    else
-        # If packages are selected, install dependencies for those packages only.
+    mkdir -p $HOME/.cache/kalman_ws
+    local can_skip_rosdep_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=rosdep_mod_times.json --trigger-file=package.xml $pkg_paths)
+    if [ -n "$can_skip_rosdep_json" ]; then
+        echo "Installing rosdep dependencies..."
         rosdep install --rosdistro $ROS_DISTRO --default-yes --ignore-packages-from-source --from-paths $pkg_paths
-    fi
-
-    # Check if rosdep install was successful.
-    if [ $? -ne 0 ]; then
-        echo "Failed to install rosdep dependencies."
-        cd $prev_dir
-        unset prev_dir
-        return
+        if [ $? -ne 0 ]; then
+            echo "Failed to install rosdep dependencies."
+            cd $prev_dir
+            return
+        fi
+        # Update marker file.
+        echo "$can_skip_rosdep_json" > $HOME/.cache/kalman_ws/rosdep_mod_times.json
     fi
 
     # Install additional APT dependencies.
     # Those are located in the apt_packages.txt file in each package.
-    # Use colcon to list packages and paths to them.
-    # Then check if apt_packages.txt exists in each path.
-    # If it does, install the packages using apt.
-    echo "Installing custom APT dependencies..."
-    installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
-    for pkg_path in $pkg_paths; do
-        if [ -f "$pkg_path/apt_packages.txt" ]; then
-            # Read apt_packages.txt.
-            apt_ids=$(cat $pkg_path/apt_packages.txt)
-            # For each package name, check if it is installed.
-            # If not, install it.
-            for apt_id in $apt_ids; do
-                # Check if apt_id is in installed_apt_ids.
-                # installed_apt_ids="package-1 package-2 ..."
-                if [[ $installed_apt_ids != *"$apt_id"* ]]; then
-                    echo "Installing $apt_id..."
-                    sudo apt install -y $apt_id
-
-                    # Check if installation was successful.
-                    if [ $? -ne 0 ]; then
-                        echo "Failed to install $apt_id."
-                        cd $prev_dir
-                        unset prev_dir
-                        return
+    local can_skip_apt_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=apt_mod_times.json --trigger-file=apt_packages.txt $pkg_paths)
+    if [ -n "$can_skip_apt_json" ]; then
+        echo "Installing custom APT dependencies..."
+        local installed_apt_ids=$(apt list --installed 2>/dev/null | cut -d '/' -f 1)
+        for pkg_path in $pkg_paths; do
+            if [ -f "$pkg_path/apt_packages.txt" ]; then
+                # Read apt_packages.txt.
+                local apt_ids=$(cat $pkg_path/apt_packages.txt)
+                # For each package name, check if it is installed.
+                # If not, install it.
+                for apt_id in $apt_ids; do
+                    # Check if apt_id is in installed_apt_ids.
+                    # installed_apt_ids="package-1 package-2 ..."
+                    if [[ $installed_apt_ids != *"$apt_id"* ]]; then
+                        echo "Installing $apt_id..."
+                        sudo apt install -y $apt_id
+                        if [ $? -ne 0 ]; then
+                            echo "Failed to install $apt_id."
+                            cd $prev_dir
+                            return
+                        fi
                     fi
-                fi
-            done
-        fi
-    done
+                done
+            fi
+        done
+        echo "$can_skip_apt_txt" > $HOME/.cache/kalman_ws/apt_mod_times.json
+    fi
 
     # Install additional PIP dependencies.
     # Those are located in the requirements.txt file in each package.
-    # Use colcon to list packages and paths to them.
-    # Then check if requirements.txt exists in each path.
-    # If it does, install the packages using pip.
-    echo "Installing custom PIP dependencies..."
-    installed_pip_ids=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
-    for pkg_path in $pkg_paths; do
-        if [ -f "$pkg_path/requirements.txt" ]; then
-            # Read requirements.txt.
-            pip_ids=$(cat $pkg_path/requirements.txt | sed 's/\s*#.*//g')
-            # For each package name, check if it is installed.
-            # If not, install it.
-            for pip_id in $pip_ids; do
-                # Check if PIP_ID is in installed_pip_ids.
-                # installed_pip_ids="package-1 package-2..."
-                pip_id_without_version=$(echo $pip_id | cut -d '=' -f 1 | cut -d '>' -f 1 | cut -d '<' -f 1)
-                if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
-                    echo "Installing $pip_id..."
-                    pip install $pip_id
-
-                    # Check if installation was successful.
-                    if [ $? -ne 0 ]; then
-                        echo "Failed to install $pip_id."
-                        cd $prev_dir
-                        unset prev_dir
-                        return
+    local can_skip_pipe_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=pip_mod_times.json --trigger-file=requirements.txt $pkg_paths)
+    if [ -n "$can_skip_pipe_json" ]; then
+        echo "Installing custom PIP dependencies..."
+        local installed_pip_ids=$(pip freeze 2>/dev/null | cut -d '=' -f 1)
+        for pkg_path in $pkg_paths; do
+            if [ -f "$pkg_path/requirements.txt" ]; then
+                # Read requirements.txt.
+                local pip_ids=$(cat $pkg_path/requirements.txt | sed 's/\s*#.*//g')
+                # For each package name, check if it is installed.
+                # If not, install it.
+                for pip_id in $pip_ids; do
+                    # Check if PIP_ID is in installed_pip_ids.
+                    # installed_pip_ids="package-1 package-2..."
+                    local pip_id_without_version=$(echo $pip_id | cut -d '=' -f 1 | cut -d '>' -f 1 | cut -d '<' -f 1)
+                    if [[ $installed_pip_ids != *"$pip_id_without_version"* ]]; then
+                        echo "Installing $pip_id..."
+                        pip install $pip_id
+                        if [ $? -ne 0 ]; then
+                            echo "Failed to install $pip_id."
+                            cd $prev_dir
+                            return
+                        fi
                     fi
-                fi
-            done
-        fi
-    done
+                done
+            fi
+        done
+        echo "$can_skip_pipe_json" > $HOME/.cache/kalman_ws/pip_mod_times.json
+    fi
 
     # Build the workspace.
     echo "Building packages..."
-    if [ $selected_packages = false ]; then
-        # If no packages are selected, build all packages.
-        colcon build --symlink-install --base-paths src --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    else
-        # If packages are selected, build only those packages.
-        colcon build --symlink-install --base-paths src --packages-select $pkg_names --allow-overriding $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
-    fi
+    colcon build --symlink-install --base-paths src --packages-select $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
-
-    # Source setup scripts.
-    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
     # Load .vscode/settings.json.
     echo "Updating Visual Studio Code settings..."
     python3 $_KALMAN_WS_ROOT/scripts/configure_vscode.py
 
-    echo "Done building packages."
+    # Source setup scripts.
+    source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
+    echo "Done."
     cd $prev_dir
-    unset prev_dir
 }
 
 # Removes build artifacts in workspace.
 clean() {
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-    # Select packages to clean.
-    # If no arguments are provided, select all packages.
-    # See the same code in build() for additional comments.
-    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
-    pkg_info=($pkg_info)
-    pkg_names=""
-    pkg_paths=""
-    selected_packages=false
+    # Select packages to build.
+    # If no arguments are provided, build all packages.
+    local pkg_names=""
+    local pkg_paths=""
+    while IFS=: read -r name path; do
+        local pkg_names="$pkg_names $name"
+        local pkg_paths="$pkg_paths $path"
+    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@" kalman_ws_disable_recursive_dependencies_in_selection)
+    local selected_packages=false
     if [ $# -ne 0 ]; then
-        selected_packages=true
-        queries="$@"
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            for query in $queries; do
-                if [[ $name == *"$query"* ]]; then
-                    pkg_names="$pkg_names $name"
-                    pkg_paths="$pkg_paths $path"
-                    break
-                fi
-            done
-        done
-    else
-        # If no arguments are provided, clean all packages.
-        for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
-            pkg_names="$pkg_names $name"
-            pkg_paths="$pkg_paths $path"
-        done
+        local selected_packages=true
     fi
-    pkg_names=$(echo $pkg_names | sed 's/^ //')
-    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
-    # If no packages are found, show an error message and return.
+    # If no packages are found, show an error messeage and return.
     if [ -z "$pkg_names" ]; then
         echo "The query did not match any packages."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -241,15 +180,13 @@ clean() {
     unset CMAKE_PREFIX_PATH
     source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 
+    echo "Done."
     cd $prev_dir
-    unset prev_dir
-
-    echo "Done cleaning."
 }
 
 # Auto-formats all supported file types in the workspace.
 format() {
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
     # Add Python binaries to the PATH if they are not already there.
@@ -259,7 +196,7 @@ format() {
 
     # Ensure that clang-format and black are installed from PyPI.
     # Use PIP to check for that because clang-format could have been installed from APT.
-    pkgs=$(pip3 freeze)
+    local pkgs=$(pip3 freeze)
     if ! echo $pkgs | grep -q ' clang-format=='; then
         echo "Installing clang-format..."
         pip3 install --user clang-format
@@ -270,7 +207,7 @@ format() {
     fi
 
     # Find Python files to format and run black on them.
-    python_files=$(find src -name '*.py')
+    local python_files=$(find src -name '*.py')
     if [ ! -z "$python_files" ]; then
         echo "Formatting Python files:"
         black $python_files
@@ -278,18 +215,18 @@ format() {
     fi
 
     # Find C++ files to format and run clang-format on them.
-    cpp_files=$(find src -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
+    local cpp_files=$(find src -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
     if [ ! -z "$cpp_files" ]; then
         echo "Formatting C++ files:"
         for file in $cpp_files; do
             # Check if any upper directory contains an AMENT_IGNORE or COLCON_IGNORE file.
             # If it does, skip the file.
-            dir=$(dirname "$file")
+            local dir=$(dirname "$file")
             while [ "$dir" != "." ] && [ "$dir" != "/" ]; do
                 if [ -e "$dir/AMENT_IGNORE" ] || [ -e "$dir/COLCON_IGNORE" ]; then
                     continue 2
                 fi
-                dir=$(dirname "$dir")
+                local dir=$(dirname "$dir")
             done
             echo "Formatting $(basename $file)..."
             clang-format -i $file
@@ -297,39 +234,39 @@ format() {
         echo
     fi
 
+    echo "Done."
     cd $prev_dir
-    unset prev_dir
 }
 
 # Runs Colcon tests and linters in the workspace.
 # This macro cannot be named 'test' because it conflicts with the built-in test command in Bash.
 lint() {
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
     # Select packages to test.
     # If no arguments are provided, select all packages.
     # See the same code in build() for additional comments.
-    pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
-    pkg_info=($pkg_info)
-    pkg_names=""
-    pkg_paths=""
+    local pkg_info=$(colcon list --base-paths src | grep -oP '\S+\s\S+(?=\s)')
+    local pkg_info=($pkg_info)
+    local pkg_names=""
+    local pkg_paths=""
     if [ $# -ne 0 ]; then
-        queries="$@"
+        local queries="$@"
         for ((i = 0; i < ${#pkg_info[@]}; i += 2)); do
-            name=${pkg_info[$i]}
-            path=${pkg_info[$i + 1]}
+            local name=${pkg_info[$i]}
+            local path=${pkg_info[$i + 1]}
             for query in $queries; do
                 if [[ $name == *"$query"* ]]; then
-                    pkg_names="$pkg_names $name"
-                    pkg_paths="$pkg_paths $path"
+                    local pkg_names="$pkg_names $name"
+                    local pkg_paths="$pkg_paths $path"
                     break
                 fi
             done
         done
     fi
-    pkg_names=$(echo $pkg_names | sed 's/^ //')
-    pkg_paths=$(echo $pkg_paths | sed 's/^ //')
+    local pkg_names=$(echo $pkg_names | sed 's/^ //')
+    local pkg_paths=$(echo $pkg_paths | sed 's/^ //')
 
     echo "Running tests:"
 
@@ -337,7 +274,6 @@ lint() {
     if [ ! -d "build" ]; then
         echo "Workspace has not been built yet. Run 'build' first."
         cd $prev_dir
-        unset prev_dir
         return
     fi
 
@@ -350,14 +286,14 @@ lint() {
 
     # TODO: Somethow detect test failure and provide results for only the selected packages.
 
+    echo "Done."
     cd $prev_dir
-    unset prev_dir
 }
 
 # Finds the largest objects current Git repository.
 git-du() {
     # Create a table with rows formatted like so: "<hash> <size> <path>"
-    table="$(
+    local table="$(
         git rev-list --objects --all |
         git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' |
         sed -n 's/^blob //p' |
@@ -371,22 +307,22 @@ git-du() {
     echo "$table" | tail -n 10
 
     # Create a sum expression from the sizes.
-    exp="$(echo "$table" | awk '{ print $2 }' | paste -sd+ -)"
+    local exp="$(echo "$table" | awk '{ print $2 }' | paste -sd+ -)"
     # example exp: 923B+927B+974B+983B+1017B+1.0KiB+1.0KiB+1.1KiB+1.1KiB+1.1KiB
 
     # Convert human-readable sizes to byte counts and then evaluate the sum.
-    exp="$(echo "$exp" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g')"
-    total="$(echo "$exp" | bc)"
+    local exp="$(echo "$exp" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g')"
+    local total="$(echo "$exp" | bc)"
 
     # Count all files.
-    num_files="$(echo "$table" | wc -l)"
+    local num_files="$(echo "$table" | wc -l)"
 
     # Display the total size and the number of files.
     echo "$(echo "$total" | $(command -v gnumfmt || echo numfmt) --to=iec-i --suffix=B --padding=20) total ($num_files files)"
 
     # Find the size of the pack files and convert it to byte count.
-    pack_total_hr="$(git count-objects -vH | grep -E 'size-pack' | sed 's/.*size-pack: //')"
-    pack_total="$(echo "$pack_total_hr" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g' | bc)"
+    local pack_total_hr="$(git count-objects -vH | grep -E 'size-pack' | sed 's/.*size-pack: //')"
+    local pack_total="$(echo "$pack_total_hr" | sed 's/GiB/*1073741824/g' | sed 's/MiB/*1048576/g' | sed 's/KiB/*1024/g' | sed 's/B//g' | bc)"
 
     # Display the size of the pack files.
     echo "$(echo "$pack_total" | $(command -v gnumfmt || echo numfmt) --to=iec-i --suffix=B --padding=20) of pack files (represents download size only if no other branches were checked out since cloning)"
@@ -403,11 +339,11 @@ reset-pull() {
     fi
     echo
 
-    prev_dir=$(pwd)
+    local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
     # Find all submodules.
-    REPOS=$(find ./src/ -name .git -execdir pwd \;)
+    local REPOS=$(find ./src/ -name .git -execdir pwd \;)
 
     # # checkout
     # echo "$REPOS" | xargs -P 8 -I {} git -C {} checkout main
@@ -420,11 +356,10 @@ reset-pull() {
     for REPO in $REPOS; do
         cd $REPO
         printf "$(basename $REPO) "
-        git_out=$(git checkout main 2>&1)
+        local git_out=$(git checkout main 2>&1)
         if [ $? -ne 0 ]; then
             echo "Failed to checkout on main:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -435,11 +370,10 @@ reset-pull() {
     for REPO in $REPOS; do
         cd $REPO
         printf "$(basename $REPO) "
-        git_out=$(git reset --hard origin/main 2>&1)
+        local git_out=$(git reset --hard origin/main 2>&1)
         if [ $? -ne 0 ]; then
             echo "Failed to reset to origin/main:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -450,11 +384,10 @@ reset-pull() {
     for REPO in $REPOS; do
         cd $REPO
         printf "$(basename $REPO) "
-        git_out=$(git pull 2>&1)
+        local git_out=$(git pull 2>&1)
         if [ $? -ne 0 ]; then
             echo "Failed to pull changes:\n$git_out"
             cd $prev_dir
-            unset prev_dir
             return
         fi
     done
@@ -466,66 +399,9 @@ reset-pull() {
     for REPO in $REPOS; do
         cd $REPO
         printf "$(basename $REPO) - "
-        git_out=$(git log -1 --oneline 2>&1)
+        local git_out=$(git log -1 --oneline 2>&1)
         echo $git_out
     done
 
     cd $prev_dir
-    unset prev_dir
 }
-
-# # Pushes changes in each repository.
-# # Will automatically commit if needed.
-# # Will ask for the commit message.
-# push() {
-#     prev_dir=$(pwd)
-#     cd $_KALMAN_WS_ROOT
-
-#     # Find all repositories.
-#     REPOS=$(find . -type d -name .git -execdir pwd \;)
-
-#     # Push all repositories.
-#     for REPO in $REPOS; do
-#         # Check if there are changes.
-#         cd $REPO
-#         git diff-index --quiet HEAD --
-#         if [ $? -ne 0 ]; then
-#             # Changes exist.
-#             echo "There are uncommitted changes in $REPO."
-
-#             # Ask for the commit message.
-#             echo "Commit message:"
-#             read COMMIT_MESSAGE
-
-#             # Ask for optional branch name (default to current branch).
-#             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-#             echo "Create new branch? Name (leave empty for current branch):"
-#             read BRANCH_NAME
-#             if [ ! -z "$BRANCH_NAME" ]; then
-#                 # Try to create the branch.
-#                 git checkout -b $BRANCH_NAME
-#                 if [ $? -ne 0 ]; then
-#                     echo "Failed to create branch $BRANCH_NAME."
-#                     cd $prev_dir
-#                     unset prev_dir
-#                     return
-#                 fi
-#             fi
-
-#             # Commit changes.
-#             git add .
-#             git commit -m "$COMMIT_MESSAGE"
-#             if [ $? -ne 0 ]; then
-#                 echo "Failed to commit changes."
-#                 cd $prev_dir
-#                 unset prev_dir
-#                 return
-#             fi
-#             git push --set-upstream origin $BRANCH_NAME
-
-#         fi
-#     done
-
-#     cd $prev_dir
-#     unset prev_dir
-# }

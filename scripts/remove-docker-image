@@ -1,3 +1,0 @@
-#!/usr/bin/sh
-
-docker image rm -f kalman_ws:ros2
