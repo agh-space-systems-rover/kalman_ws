@@ -47,7 +47,7 @@ if [[ ! -d $distrobox_home ]]; then
         read -p "Are you sure you want to continue? (Y/N): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            return
+            exit 0
         fi
         echo
 
