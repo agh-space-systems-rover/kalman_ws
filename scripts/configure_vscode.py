@@ -38,6 +38,7 @@ def elem(arr, index, default=None):
 
 ws_dir = os.path.normpath(os.path.dirname(__file__) + "/..")
 config_path = os.path.join(ws_dir, ".vscode/settings.json")
+compile_commands_path = os.path.join(ws_dir, "build/compile_commands.json")
 
 site_dir = os.path.expanduser("~/.vscode-paths/ros2-site-packages")
 dist_dir = os.path.expanduser("~/.vscode-paths/ros2-dist-packages")
@@ -124,8 +125,8 @@ if os.path.isdir(install_dir):
             ):
                 config["python.autoComplete.extraPaths"].append(site_packages_dir)
             # Add C++ include directories to the paths.
-            for include_dir in glob.glob(os.path.join(item_dir, "include")):
-                config["C_Cpp.default.includePath"].append(include_dir + "/**")
+            for cpp_include_dir in glob.glob(os.path.join(item_dir, "include")):
+                config["C_Cpp.default.includePath"].append(cpp_include_dir + "/**")
 
 # If running in Distrobox, add the host's user site-packages and dist-packages to the paths.
 if running_distrobox:
@@ -138,6 +139,27 @@ if running_distrobox:
         os.path.expanduser("~/.local/lib/python*/dist-packages")
     ):
         config["python.autoComplete.extraPaths"].append(dist_packages_dir)
+
+    # Change compile commands to use the host's include directories.
+    if os.path.isfile(compile_commands_path):
+        with open(compile_commands_path, "r", encoding="UTF-8") as f:
+            compile_commands = f.read()
+            compile_commands = compile_commands.replace(
+                "/opt/ros/humble/include", include_dir
+            ).replace(f"-I{include_dir}", f"-isystem {include_dir}")
+            compile_commands = compile_commands.replace("/usr/include", usr_include_dir)
+
+            extra_includes = f"-isystem {usr_include_dir} -isystem {os.path.join(usr_include_dir, 'x86_64-linux-gnu')}"
+            # Each command has -O flag, at the end of includes, so we add before it.
+            compile_commands = compile_commands.replace(
+                f"{extra_includes} -O",
+                "-O",
+            )
+            compile_commands = compile_commands.replace("-O", f"{extra_includes} -O")
+
+        with open(compile_commands_path, "w", encoding="UTF-8") as f:
+            f.write(compile_commands)
+
 
 # Sort the paths.
 config["python.autoComplete.extraPaths"].sort()
