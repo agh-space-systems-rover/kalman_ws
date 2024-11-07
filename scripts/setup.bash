@@ -20,6 +20,16 @@ if [ ! -f "/etc/apt/sources.list.d/nodesource.list" ]; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 fi
 
+# Install spacenavd if not available.
+if [ ! -f "/usr/bin/spacenavd" ]; then
+    echo "spacenavd is not installed. Installing..."
+    sudo apt-get install -y spacenavd
+fi
+# Quietly start spacenavd if not started.
+if [ ! -f "/run/spnavd.pid" ]; then
+    sudo start-stop-daemon --start --pidfile /run/spnavd.pid --exec /usr/bin/spacenavd -- -v
+fi
+
 # Include all other setup scripts.
 source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash

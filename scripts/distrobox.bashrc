@@ -15,8 +15,5 @@ export SHELL=/usr/bin/bash
 ulimit -Sn 524288
 ulimit -Hn 524288
 
-# Enable spacenavd daemon.
-sudo start-stop-daemon --start --pidfile /run/spnavd.pid --exec /usr/bin/spacenavd -- -v
-
 # Source the setup.
 source $(dirname $BASH_SOURCE)/../scripts/setup.bash
