@@ -111,7 +111,7 @@ build() {
 
     # Build the workspace.
     echo "Building packages..."
-    colcon build --symlink-install --base-paths src --packages-select $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+    colcon build --symlink-install --base-paths src --packages-select $pkg_names --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --no-warn-unused-cli
     if [ $? -ne 0 ]; then
         echo "Failed to build some packages."
         cd $prev_dir
