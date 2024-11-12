@@ -5,13 +5,12 @@ ROS 2 development environment for the Kalman rover
 ## Prerequisites
 
 If you wish to use a Docker container:
-- [Docker](https://www.docker.com/) + [BuildX](https://github.com/docker/buildx)
+- [Docker](https://www.docker.com) or alternatively [Podman](https://podman.io)
 - [Distrobox](https://github.com/89luca89/distrobox)
 
 If you wish to develop natively on your Ubuntu Jammy:
 - [ROS 2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
-- [Python 3](https://www.python.org) possibly along with `python-is-python3`
-- [setuptools 58.2.0](https://pypi.org/project/setuptools/58.2.0/) to remove warnings when building Python-based ROS packages
+- [Python 3](https://www.python.org) along with `python-is-python3`
 
 ## Getting Started
 
