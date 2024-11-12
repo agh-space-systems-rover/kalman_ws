@@ -78,6 +78,7 @@ if [[ ! -d $distrobox_home ]]; then
     distrobox create --image docker.io/osrf/ros:$ros_distro-desktop-full --yes --name kalman_ws --home "$distrobox_home" --additional-packages "$additional_packages" --absolutely-disable-root-password-i-am-really-positively-sure --init-hooks "chsh -s /usr/bin/bash $USER && (yes | sudo unminimize)" $nvidia --no-entry
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
+        rm -r .distrobox
         exit 1
     fi
 
