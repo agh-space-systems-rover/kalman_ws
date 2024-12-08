@@ -82,8 +82,12 @@ if [[ ! -d $distrobox_home ]]; then
         exit 1
     fi
 
-    # Link distrobox.bashrc.
-    cp $script_dir/distrobox.bashrc $distrobox_home/.bashrc
+    # Copy template .bashrc
+    # This file can be edited by the user afterwards.
+    cp $script_dir/distrobox-template.bashrc $distrobox_home/.bashrc
+
+    # Replace "<<<ROS_DISTRO_TEMPLATE_SUBSTITUTION>>>"
+    sed -i "s/\"<<<ROS_DISTRO_TEMPLATE_SUBSTITUTION>>>\"/$ros_distro/g" $distrobox_home/.bashrc
 fi
 
 # Enter the Distrobox using a custom shell entrypoint which will

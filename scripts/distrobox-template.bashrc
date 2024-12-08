@@ -7,8 +7,9 @@ source $(dirname $BASH_SOURCE)/../scripts/default-ubuntu.bashrc
 # Ensure that host-spawn is properly installed.
 distrobox-host-exec --yes cat /dev/null
 
-# Fix-up SHELL variable passed from the host.
+# Fix-up variables passed from the host.
 export SHELL=/usr/bin/bash
+export ROS_DISTRO="<<<ROS_DISTRO_TEMPLATE_SUBSTITUTION>>>"
 
 # Fix file descriptor limits in Docker.
 # This fixes rosout memory leaks.
