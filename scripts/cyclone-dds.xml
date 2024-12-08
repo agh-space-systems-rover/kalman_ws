@@ -5,11 +5,11 @@
       <AllowMulticast>spdp</AllowMulticast>
     </General>
     <Discovery>
-        <!-- <Peers>
-            <Peer address="[IPV4-address]"/>
-        </Peers> -->
-        <ParticipantIndex>auto</ParticipantIndex>
-        <MaxAutoParticipantIndex>100</MaxAutoParticipantIndex>
+      <!-- <Peers>
+        <Peer address="[IPV4-address]"/>
+      </Peers> -->
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>100</MaxAutoParticipantIndex>
     </Discovery>
   </Domain>
 </CycloneDDS>
