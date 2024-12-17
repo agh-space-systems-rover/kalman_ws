@@ -1,3 +1,11 @@
+##################################
+# PLEASE DO NOT MODIFY THIS FILE #
+##################################
+
+# It was copied from a fresh Ubuntu 20.04 installation.
+# The below commands are sourced by distrobox-template.bashrc in order to set up the shell.
+# If you wish to change distrobox defaults, please modify that file instead.
+
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
