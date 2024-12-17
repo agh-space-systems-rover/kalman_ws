@@ -10,6 +10,7 @@ distrobox-host-exec --yes cat /dev/null
 # Fix-up variables passed from the host.
 export SHELL=/usr/bin/bash
 export ROS_DISTRO="<<<ROS_DISTRO_TEMPLATE_SUBSTITUTION>>>"
+export PATH=/usr/bin:$PATH
 
 # Fix file descriptor limits in Docker.
 # This fixes rosout memory leaks.
