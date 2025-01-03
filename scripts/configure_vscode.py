@@ -144,9 +144,10 @@ if running_distrobox:
     if os.path.isfile(compile_commands_path):
         with open(compile_commands_path, "r", encoding="UTF-8") as f:
             compile_commands = f.read()
-            compile_commands = compile_commands.replace(
-                "/opt/ros/humble/include", include_dir
-            ).replace(f"-I{include_dir}", f"-isystem {include_dir}")
+            # Replace ROS include directories with the host's include directories
+            for ros_include_dir in glob.glob("/opt/ros/*/include"):
+                compile_commands = compile_commands.replace(ros_include_dir, include_dir)
+            compile_commands = compile_commands.replace(f"-I{include_dir}", f"-isystem {include_dir}")
             compile_commands = compile_commands.replace("/usr/include", usr_include_dir)
 
             extra_includes = f"-isystem {usr_include_dir} -isystem {os.path.join(usr_include_dir, 'x86_64-linux-gnu')}"

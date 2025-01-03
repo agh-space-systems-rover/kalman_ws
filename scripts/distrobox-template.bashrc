@@ -15,7 +15,7 @@ distrobox-host-exec --yes cat /dev/null
 # We use bash, but the host might use something else.
 export SHELL=/usr/bin/bash
 # If host has ROS installed, it might be a different version.
-export ROS_DISTRO=humble
+export ROS_DISTRO="<<<ROS_DISTRO_TEMPLATE_SUBSTITUTION>>>"
 # Host might have /bin before /usr/bin which is not good.
 export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin
 

@@ -1,7 +1,7 @@
 __pycache__
 
 # Distrobox home directory
-/.distrobox
+/.distrobox*
 
 # Visual Studio Code configuration
 /.vscode

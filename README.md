@@ -26,12 +26,11 @@ git submodule update --init --recursive
 
 ### Containerized Development
 
-To enter the accelerated ROS 2 shell, run this automated script:
+To enter the ROS 2 shell, run this automated script:
 ```bash
 ./scripts/distrobox
 ```
-It will automatically build the Docker image if it is not present on your system.
-Then, using this image, a new distrobox will be created and you will be logged in automatically.
+A new distrobox will be created and you will be logged in automatically.
 
 After the initial setup of your container is done, you will be able to use ROS 2 and graphical tools such as Rviz and Rqt.
 
