@@ -1,6 +1,9 @@
 # Find the root of the Kalman workspace.
 export _KALMAN_WS_ROOT=$(realpath $(dirname $BASH_SOURCE)/..)
 
+# Source ROS 2 workspaces.
+source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
+
 # Enable global pip.
 export PIP_BREAK_SYSTEM_PACKAGES=1
 
@@ -40,8 +43,7 @@ if [ ! -f "/run/spnavd.pid" ]; then
     sudo start-stop-daemon --start --pidfile /run/spnavd.pid --exec /usr/bin/spacenavd -- -v
 fi
 
-# Include all other setup scripts.
-source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
+# Install macros.
 source $_KALMAN_WS_ROOT/scripts/macros.bash
 source $_KALMAN_WS_ROOT/scripts/kalm.bash
 
