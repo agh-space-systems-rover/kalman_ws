@@ -13,6 +13,16 @@ fi
 # Enable Cyclone DDS.
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI="file://$_KALMAN_WS_ROOT/scripts/cyclone-dds.xml"
+# Enable multicast on loopback if it is disabled.
+if [[ $(ip link show lo | grep MULTICAST | wc -l) -eq 0 ]]; then
+    # Only do it outside of Distrobox
+    if [ -z "$DISTROBOX_HOST_HOME" ]; then
+        echo "Enabling multicast on loopback..."
+        sudo ip link set lo multicast on
+    else
+        echo "Multicast on loopback is disabled. Please enable it using: sudo ip link set lo multicast on"
+    fi
+fi
 
 # Enable NodeJS v20 repo.
 if [ ! -f "/etc/apt/sources.list.d/nodesource.list" ]; then

@@ -35,6 +35,13 @@ if ! command -v flatpak &> /dev/null; then
     fi
 fi
 
+# Enable multicast on loopback if it is not enabled.
+# Distrobox does not have NET_ADMIN capability to be able to set it.
+if [[ $(ip link show lo | grep MULTICAST | wc -l) -eq 0 ]]; then
+    echo "Enabling multicast on loopback..."
+    sudo ip link set lo multicast on
+fi
+
 # Check if Distrobox home doesn't exist.
 # This is much faster than checking if Distrobox instance doesn't exist.
 if [[ ! -d $distrobox_home ]]; then
