@@ -138,41 +138,40 @@ clean() {
     # If no arguments are provided, build all packages.
     local pkg_names=""
     local pkg_paths=""
-    while IFS=: read -r name path; do
-        local pkg_names="$pkg_names $name"
-        local pkg_paths="$pkg_paths $path"
-    done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@" kalman_ws_disable_recursive_dependencies_in_selection)
     local selected_packages=false
     if [ $# -ne 0 ]; then
         local selected_packages=true
-    fi
 
-    # If no packages are found, show an error messeage and return.
-    if [ -z "$pkg_names" ]; then
-        echo "The query did not match any packages."
-        cd $prev_dir
-        return
-    fi
+        while IFS=: read -r name path; do
+            local pkg_names="$pkg_names $name"
+            local pkg_paths="$pkg_paths $path"
+        done < <(python3 "$_KALMAN_WS_ROOT/scripts/select_colcon_packages.py" "$@" kalman_ws_disable_recursive_dependencies_in_selection)
 
-    # Display which packages will be cleared if queries are used.
-    if [ $selected_packages = true ]; then
+        # If no packages are found, show an error messeage and return.
+        if [ -z "$pkg_names" ]; then
+            echo "The query did not match any packages."
+            cd $prev_dir
+            return
+        fi
+
+        # Display which packages will be cleared.
         echo "Packages to clean:"
         for pkg in $pkg_names; do
             echo '  -' $pkg
         done
-    fi
 
-    if [ $selected_packages = false ]; then
-        # If not arguments were provided, perform a full wipe.
-        rm -rf $_KALMAN_WS_ROOT/build
-        rm -rf $_KALMAN_WS_ROOT/install
-        rm -rf $_KALMAN_WS_ROOT/log
-    else
-        # Remove build artifacts for selected packages only.
+        # Remove build artifacts.
         for pkg_name in $pkg_names; do
             rm -rf $_KALMAN_WS_ROOT/build/$pkg_name
             rm -rf $_KALMAN_WS_ROOT/install/$pkg_name
         done
+    else
+        echo "Cleaning all build artifacts."
+
+        # If not arguments were provided, perform a full wipe.
+        rm -rf $_KALMAN_WS_ROOT/build
+        rm -rf $_KALMAN_WS_ROOT/install
+        rm -rf $_KALMAN_WS_ROOT/log
     fi
 
     # Remove paths from $AMENT_PREFIX_PATH and $CMAKE_PREFIX_PATH.
