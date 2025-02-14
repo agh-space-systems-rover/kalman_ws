@@ -1,0 +1,69 @@
+//
+// This file presents the default configuration used by both the `zenoh-plugin-ros2dds` plugin and the `zenoh-bridge-ros2dds` standalone executable.
+// The "ros2" JSON5 object below can be used as such in the "plugins" part of a config file for the zenoh router (zenohd).
+//
+{
+  // plugins: {
+  //   //
+  //   // ROS2 related configuration
+  //   // All settings are optional and are unset by default - uncomment the ones you want to set
+  //   //
+  //   ros2dds: {
+  //     //
+  //     // pub_max_frequencies: Specify a list of maximum frequency of publications routing over zenoh for a set of Publishers.
+  //     //                      The strings must have the format "<regex>=<float>":
+  //     //                      - "regex" is a regular expression matching a Publisher interface name
+  //     //                      - "float" is the maximum frequency in Hertz;
+  //     //                        if publication rate is higher, downsampling will occur when routing.
+  //     pub_max_frequencies: ["/tf=1"],
+
+  //     //
+  //     // reliable_routes_blocking: When true, the publications from a RELIABLE DDS Writer will be
+  //     //                           routed to zenoh using the CongestionControl::Block option.
+  //     //                           Meaning the routing will be blocked in case of network congestion,
+  //     //                           blocking the DDS Reader and the RELIABLE DDS Writer in return.
+  //     //                           When false (or for BERST_EFFORT DDS Writers), CongestionControl::Drop
+  //     //                           is used, meaning the route might drop some data in case of congestion.
+  //     //
+  //     reliable_routes_blocking: false,
+
+  //     //
+  //     // queries_timeout: Timeouts configuration for various Zenoh queries.
+  //     //                  Each field is optional. If not set, the 'default' timeout (5.0 seconds by default) applies to all queries,
+  //     //                  except for actions' get_result that is by default configured with a larget timeout (300.0 seconds)
+  //     //                  to support actions that last a long time.
+  //     //                  Refer to https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds/issues/369#issuecomment-2563725619
+  //     //                  Each value can be either a float in seconds that will apply as a timeout to all queries,
+  //     //                  either a list of strings with format "<regex>=<float>" where:
+  //     //                      - "regex" is a regular expression matching an interface name
+  //     //                      - "float" is the timeout in seconds
+  //     queries_timeout: {
+  //       //// timeouts for Action clients calling an Action server (send_goal, cancel_goal and get_result services)
+  //       actions: {
+  //         send_goal: 1.0,
+  //         cancel_goal: 1.0,
+  //         get_result: 10000.0,
+  //       },
+  //     },
+  //   },
+  // },
+  //
+  // Configure the scouting mechanisms and their behaviours
+  //
+  scouting: {
+    /// The UDP multicast scouting configuration.
+    multicast: {
+      /// Which type of Zenoh instances to automatically establish sessions with upon discovery on UDP multicast.
+      /// Accepts a single value or different values for router, peer and client.
+      /// Each value is an array containing values "peer", "router" and "client".
+      autoconnect: { router: ["router"] },
+    },
+    /// The gossip scouting configuration.
+    gossip: {
+      /// Which type of Zenoh instances to automatically establish sessions with upon discovery on gossip.
+      /// Accepts a single value or different values for router, peer and client.
+      /// Each value is an array containing values "peer", "router" and "client".
+      autoconnect: { router: ["router"] },
+    },
+  },
+}
