@@ -30,6 +30,9 @@ if [ ! -f "/run/spnavd.pid" ]; then
     sudo start-stop-daemon --start --pidfile /run/spnavd.pid --exec /usr/bin/spacenavd -- -v
 fi
 
+# Enable colored ROS output.
+export RCUTILS_COLORIZED_OUTPUT=1
+
 # Include all other setup scripts.
 source $_KALMAN_WS_ROOT/scripts/source-ros-setups.bash
 source $_KALMAN_WS_ROOT/scripts/macros.bash
