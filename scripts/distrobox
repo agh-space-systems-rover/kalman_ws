@@ -3,7 +3,7 @@
 # This script creates a new Distrobox or enters an existing one.
 
 ros_distro=humble
-additional_packages="iputils-ping nano vim alsa-utils alsa pulseaudio git git-man python3 python-is-python3 python3-pip"
+additional_packages="iputils-ping nano vim alsa-utils alsa pulseaudio git git-man python3 python-is-python3 python3-pip usbutils"
 if [[ $ros_distro != "humble" ]]; then
     additional_packages="$additional_packages unminimize"
 fi
