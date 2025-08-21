@@ -41,6 +41,7 @@ Therefore, after your distrobox is ready, you should pull the latest changes fro
 
 ```bash
 cd src/kalman_robot
+git checkout main
 git pull
 cd ../..
 ```
