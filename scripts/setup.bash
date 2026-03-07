@@ -44,3 +44,8 @@ if [ ! -d "$HOME/.ros/rosdep" ]; then
     echo "Updating rosdep index..."
     rosdep update --rosdistro $ROS_DISTRO --default-yes
 fi
+# Remove '/run/host' from the beginning of the path
+if [[ "$PWD" == /run/host* ]]; then
+    TARGET_DIR="${PWD#/run/host}"
+    cd "$TARGET_DIR" || echo "Error: Could not change to $TARGET_DIR"
+fi
