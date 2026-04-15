@@ -2,15 +2,24 @@ __pycache__
 
 # Distrobox home directory
 /.distrobox*
+.distrobox*
 
 # Visual Studio Code configuration
 /.vscode
+.vscode
 /.cache
+.cache
 
 # ROS 2 build and runtime artifacts
 /build
+build
 /install
+install
 /log
+log
 /frames_*.gv
+frames_*.gv
 /frames_*.pdf
+frames_*.pdf
 /robot_localization_debug.txt
+robot_localization_debug.txt
