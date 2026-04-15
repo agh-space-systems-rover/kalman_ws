@@ -20,7 +20,7 @@ exclude_regex='^vendor/|^kalman_hardware/compasscal_src/'
 failures=0
 
 run_black() {
-  mapfile -t files < <(git ls-files "*.py" | grep -Ev "$exclude_regex" || true)
+  mapfile -t files < <({ git ls-files '*.py' || true; git ls-files --others --exclude-standard '*.py' || true; } | grep -Ev "$exclude_regex" || true)
   if [ ${#files[@]} -eq 0 ]; then
     echo "No Python files found."
     return 0
@@ -39,7 +39,7 @@ run_black() {
 }
 
 run_clang_format() {
-  mapfile -t files < <(git ls-files "*.c" "*.cpp" "*.h" "*.hpp" | grep -Ev "$exclude_regex" || true)
+  mapfile -t files < <({ git ls-files "*.c" "*.cpp" "*.h" "*.hpp" || true; git ls-files --others --exclude-standard "*.c" "*.cpp" "*.h" "*.hpp" || true; } | grep -Ev "$exclude_regex" || true)
   if [ ${#files[@]} -eq 0 ]; then
     echo "No C/C++ files found."
     return 0
@@ -79,20 +79,7 @@ run_prettier_frontend() {
   fi
 }
 
-# If pre-commit is available, run it for hooks (black). Regardless, also run
-# clang-format and the frontend prettier checks so those tools are always enforced.
-if command -v pre-commit >/dev/null 2>&1; then
-  echo "Found pre-commit; running pre-commit ($mode)."
-  if [ "$mode" = "check" ]; then
-    pre-commit run --all-files --show-diff-on-failure || failures=$((failures+1))
-  else
-    pre-commit run --all-files || failures=$((failures+1))
-  fi
-else
-  run_black
-fi
-
-# Always run clang-format and frontend prettier checks (they may be no-ops).
+run_black
 run_clang_format
 run_prettier_frontend
 
