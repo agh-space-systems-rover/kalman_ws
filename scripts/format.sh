@@ -15,12 +15,70 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$repo_root"
 
 # Exclude vendor directories and large third-party sources
-exclude_regex='^vendor/|^kalman_hardware/compasscal_src/'
+exclude_regex='vendor/|kalman_hardware/compasscal_src/'
 
 failures=0
 
+# Gather files tracked by git or untracked (not ignored) from all nested git repositories.
+# Prints null-separated paths relative to repository root (prefixed with subrepo path when applicable).
+gather_git_files() {
+  local -a pathspecs=("$@")
+  local -a repo_dirs=()
+  declare -A seen_repo=()
+  local gitpath parent repo file
+
+  # Find nested repositories (directories or files named .git)
+  while IFS= read -r -d '' gitpath; do
+    parent="$(dirname "$gitpath")"
+    parent="${parent#./}"
+    if [ -z "${seen_repo[$parent]:-}" ]; then
+      seen_repo[$parent]=1
+      repo_dirs+=("$parent")
+    fi
+  done < <(find . -name .git -print0 2>/dev/null || true)
+
+  # If the current directory is a git repository but wasn't found above, include it.
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    if [ -z "${seen_repo[.]:-}" ]; then
+      repo_dirs+=(".")
+      seen_repo[.]=1
+    fi
+  fi
+
+  if [ ${#repo_dirs[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  for repo in "${repo_dirs[@]}"; do
+    # Tracked files
+    git -C "$repo" ls-files -z -- "${pathspecs[@]}" 2>/dev/null | while IFS= read -r -d '' file; do
+      if [ "$repo" = "." ] || [ "$repo" = "./" ]; then
+        printf '%s\0' "$file"
+      else
+        printf '%s\0' "${repo%/}/$file"
+      fi
+    done
+
+    # Untracked (but not ignored)
+    git -C "$repo" ls-files --others --exclude-standard -z -- "${pathspecs[@]}" 2>/dev/null | while IFS= read -r -d '' file; do
+      if [ "$repo" = "." ] || [ "$repo" = "./" ]; then
+        printf '%s\0' "$file"
+      else
+        printf '%s\0' "${repo%/}/$file"
+      fi
+    done
+  done
+}
+
 run_black() {
-  mapfile -t files < <({ git ls-files '*.py' || true; git ls-files --others --exclude-standard '*.py' || true; } | grep -Ev "$exclude_regex" || true)
+  files=()
+  while IFS= read -r -d '' f; do
+    if [[ "$f" =~ $exclude_regex ]]; then
+      continue
+    fi
+    files+=("$f")
+  done < <(gather_git_files '*.py')
+
   if [ ${#files[@]} -eq 0 ]; then
     echo "No Python files found."
     return 0
@@ -39,7 +97,15 @@ run_black() {
 }
 
 run_clang_format() {
-  mapfile -t files < <({ git ls-files "*.c" "*.cpp" "*.h" "*.hpp" || true; git ls-files --others --exclude-standard "*.c" "*.cpp" "*.h" "*.hpp" || true; } | grep -Ev "$exclude_regex" || true)
+  files=()
+  c_patterns=( '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' )
+  while IFS= read -r -d '' f; do
+    if [[ "$f" =~ $exclude_regex ]]; then
+      continue
+    fi
+    files+=("$f")
+  done < <(gather_git_files "${c_patterns[@]}")
+
   if [ ${#files[@]} -eq 0 ]; then
     echo "No C/C++ files found."
     return 0
