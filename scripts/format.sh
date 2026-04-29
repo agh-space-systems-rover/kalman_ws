@@ -11,8 +11,8 @@ if [[ "$mode" != "check" && "$mode" != "apply" ]]; then
   usage
 fi
 
-repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-cd "$repo_root"
+project_root=${2:-.}
+cd $project_root || exit 1
 
 # Exclude vendor directories and large third-party sources
 exclude_regex='vendor/|kalman_hardware/compasscal_src/'

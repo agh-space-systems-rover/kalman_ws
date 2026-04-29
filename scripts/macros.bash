@@ -4,7 +4,7 @@
 build() {
     local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
-    
+
     # Select packages to build.
     # If no arguments are provided, build all packages.
     local pkg_names=""
@@ -32,7 +32,7 @@ build() {
             echo '  -' $pkg
         done
     fi
-    
+
     # Install rosdep dependencies.
     mkdir -p $HOME/.cache/kalman_ws
     local can_skip_rosdep_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=rosdep_mod_times.json --trigger-file=package.xml $pkg_paths)
