@@ -55,7 +55,8 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-format tree
+          tree .
 
       - name: Install Python formatting tools
         run: |
@@ -66,4 +67,4 @@ jobs:
         run: chmod +x .ci-tools/scripts/format.sh
 
       - name: Run format check
-        run: .ci-tools/scripts/format.sh check "${{ github.workspace }}/${{ inputs.paths }}"
+        run: .ci-tools/scripts/format.sh check "${{ github.workspace }}"
