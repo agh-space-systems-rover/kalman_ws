@@ -8,6 +8,16 @@ on:
         required: false
         type: string
         default: "."
+      tooling_repo:
+        description: "Repository that provides scripts/format.sh"
+        required: false
+        type: string
+        default: "agh-space-systems-rover/kalman_ws"
+      tooling_ref:
+        description: "Ref (branch, tag, or SHA) for tooling_repo"
+        required: false
+        type: string
+        default: "ci/format-check-workflow/v1"
 
 jobs:
   format-check:
@@ -17,8 +27,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout formatting tools
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.tooling_repo }}
+          ref: ${{ inputs.tooling_ref }}
+          path: .ci-tools
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -38,7 +55,7 @@ jobs:
           pip install black
 
       - name: Make format script executable
-        run: chmod +x ./scripts/format.sh
+        run: chmod +x .ci-tools/scripts/format.sh
 
       - name: Run format check
-        run: ./scripts/format.sh check {{ inputs.paths }}
+        run: .ci-tools/scripts/format.sh check "${{ github.workspace }}/${{ inputs.paths }}"
