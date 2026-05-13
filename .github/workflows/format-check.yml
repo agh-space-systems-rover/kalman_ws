@@ -18,6 +18,12 @@ on:
         required: false
         type: string
         default: "ci/format-check-workflow/v1"
+      caller_ref:
+        type: string
+        required: false
+      caller_sha:
+        type: string
+        required: false
 
 jobs:
   format-check:
@@ -26,6 +32,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.caller_sha || inputs.caller_ref }}
 
       - name: Checkout formatting tools
         uses: actions/checkout@v4
