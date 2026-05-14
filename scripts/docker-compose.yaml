@@ -1,0 +1,18 @@
+services:
+  format:
+    build:
+      context: ..
+      dockerfile: scripts/Dockerfile
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      - HOME=/tmp
+      - NPM_CONFIG_CACHE=/tmp/.npm
+    working_dir: /workspace
+    volumes:
+      - ../:/workspace
+    tmpfs:
+      - /workspace/src/kalman_robot/kalman_gs/node_project/node_modules:rw,exec,uid=${UID:-1000},gid=${GID:-1000},mode=0775
+    entrypoint: ["sleep", "infinity"]
+    stdin_open: true
+    tty: true
+    container_name: kalman_ws
