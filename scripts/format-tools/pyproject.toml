@@ -1,0 +1,11 @@
+[project]
+name = "kalman-format-tools"
+version = "0.1.0"
+description = "Formatting tools for kalman_ws"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "black==26.3.1",
+]
+
+[tool.black]
+line-length = 88

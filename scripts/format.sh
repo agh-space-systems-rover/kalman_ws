@@ -12,7 +12,10 @@ if [[ "$mode" != "check" && "$mode" != "apply" ]]; then
 fi
 
 project_root=${2:-.}
-cd $project_root || exit 1
+cd "$project_root" || exit 1
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+uv_project_dir="$script_dir/format-tools"
 
 # Exclude vendor directories and large third-party sources
 exclude_regex='vendor/|kalman_hardware/compasscal_src/'
@@ -83,16 +86,25 @@ run_black() {
     echo "No Python files found."
     return 0
   fi
-  echo "Running black ($mode) on ${#files[@]} Python files..."
-  if ! command -v black >/dev/null 2>&1; then
+  local -a black_cmd=()
+  local black_label="black"
+  if command -v uv >/dev/null 2>&1 && [ -f "$uv_project_dir/pyproject.toml" ] && [ -f "$uv_project_dir/uv.lock" ]; then
+    black_cmd=(uv --project "$uv_project_dir" run --locked black --config "$uv_project_dir/pyproject.toml")
+    black_label="black (uv)"
+  else
+    black_cmd=(black)
+  fi
+
+  echo "Running $black_label ($mode) on ${#files[@]} Python files..."
+  if [ "${black_cmd[0]}" = "black" ] && ! command -v black >/dev/null 2>&1; then
     echo "black not found. Install with 'pip install black' or use pre-commit." >&2
     failures=$((failures+1))
     return 1
   fi
   if [ "$mode" = "check" ]; then
-    printf '%s\0' "${files[@]}" | xargs -0 black --check || failures=$((failures+1))
+    printf '%s\0' "${files[@]}" | xargs -0 "${black_cmd[@]}" --check || failures=$((failures+1))
   else
-    printf '%s\0' "${files[@]}" | xargs -0 black || failures=$((failures+1))
+    printf '%s\0' "${files[@]}" | xargs -0 "${black_cmd[@]}" || failures=$((failures+1))
   fi
 }
 
