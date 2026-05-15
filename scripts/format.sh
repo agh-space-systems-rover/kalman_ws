@@ -140,20 +140,28 @@ run_clang_format() {
 }
 
 run_prettier_frontend() {
-  frontend_dir="src/kalman_robot/kalman_gs/node_project"
-  if [ -d "$frontend_dir" ] && [ -f "$frontend_dir/package.json" ]; then
-    echo "Running prettier in frontend project..."
-    if ! command -v npm >/dev/null 2>&1; then
-      echo "npm not found; skipping frontend prettier. Install Node/npm to enable." >&2
-      return 0
-    fi
-    if [ "$mode" = "check" ]; then
-      (cd "$frontend_dir" && npm ci && npx prettier --check .) || failures=$((failures+1))
-    else
-      (cd "$frontend_dir" && npm ci && npx prettier --write .) || failures=$((failures+1))
-    fi
+  local frontend_pkg=""
+  local frontend_dir=""
+
+  frontend_pkg="$(find . -type f -path '*/kalman_gs/node_project/package.json' -print -quit)"
+  if [ -n "$frontend_pkg" ]; then
+    frontend_dir="$(dirname "$frontend_pkg")"
+  fi
+
+  if [ -z "$frontend_dir" ]; then
+    echo "No frontend project found under kalman_gs/node_project, skipping prettier."
+    return 0
+  fi
+
+  echo "Running prettier in frontend project ($frontend_dir)..."
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "npm not found; skipping frontend prettier. Install Node/npm to enable." >&2
+    return 0
+  fi
+  if [ "$mode" = "check" ]; then
+    (cd "$frontend_dir" && npm ci && npx prettier --check .) || failures=$((failures+1))
   else
-    echo "No frontend project found at $frontend_dir, skipping prettier."
+    (cd "$frontend_dir" && npm ci && npx prettier --write .) || failures=$((failures+1))
   fi
 }
 
