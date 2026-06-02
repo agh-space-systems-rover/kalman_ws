@@ -7,7 +7,6 @@ services:
     environment:
       - HOME=/tmp
       - NPM_CONFIG_CACHE=/tmp/.npm
-      - UV_PYTHON_INSTALL_DIR=/opt/uv/python
     working_dir: /workspace
     volumes:
       - ../:/workspace
