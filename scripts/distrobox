@@ -73,9 +73,16 @@ if [[ ! -d $distrobox_home ]]; then
         nvidia=""
     fi
 
+    # Detect GPG agent socket
+    gpg_agent_socket=$(gpgconf --list-dirs agent-socket 2>/dev/null)
+    if [[ -n "$gpg_agent_socket" && -S "$gpg_agent_socket" ]]; then
+        gpg_mount="--mount type=bind,source=$gpg_agent_socket,target=$gpg_agent_socket"
+    else
+        gpg_mount=""
+    fi
+
     # Create the Distrobox.
-    
-    distrobox create --image docker.io/osrf/ros:$ros_distro-desktop-full --yes --name kalman_ws --home "$distrobox_home" --additional-packages "$additional_packages" --absolutely-disable-root-password-i-am-really-positively-sure --init-hooks "chsh -s /usr/bin/bash $USER && (yes | sudo unminimize)" $nvidia --no-entry --additional-flags "--mount type=bind,source=/dev/bus/usb,target=/dev/bus/usb"
+    distrobox create --image docker.io/osrf/ros:$ros_distro-desktop-full --yes --name kalman_ws --home "$distrobox_home" --additional-packages "$additional_packages" --absolutely-disable-root-password-i-am-really-positively-sure --init-hooks "chsh -s /usr/bin/bash $USER && (yes | sudo unminimize)" $nvidia --no-entry --additional-flags "--mount type=bind,source=/dev/bus/usb,target=/dev/bus/usb $gpg_mount"
     if [[ $? -ne 0 ]]; then
         echo "Failed to create Distrobox instance."
         rm -r .distrobox

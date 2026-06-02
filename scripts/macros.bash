@@ -206,15 +206,22 @@ format() {
     fi
 
     # Find Python files to format and run black on them.
-    local python_files=$(find src -name '*.py')
+    local python_files=$(find src/kalman_robot/kalman_* -name '*.py')
     if [ ! -z "$python_files" ]; then
         echo "Formatting Python files:"
         black $python_files
         echo
     fi
 
+    # Run npm format in kalman_gs
+    if [ -d "src/kalman_robot/kalman_gs/node_project" ]; then
+        echo "Formatting kalman_gs..."
+        npm --prefix src/kalman_robot/kalman_gs/node_project run format
+        echo
+    fi
+
     # Find C++ files to format and run clang-format on them.
-    local cpp_files=$(find src -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
+	local cpp_files=$(find src/kalman_robot/kalman_* -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
     if [ ! -z "$cpp_files" ]; then
         echo "Formatting C++ files:"
         for file in $cpp_files; do
@@ -227,7 +234,10 @@ format() {
                 fi
                 local dir=$(dirname "$dir")
             done
-            echo "Formatting $(basename $file)..."
+            local rel_path=${file#src/kalman_robot/}
+			local pkg_name=${rel_path%%/*}
+            local file_name=$(basename $file)
+            echo "Formatting $pkg_name/.../$file_name..."
             clang-format -i $file
         done
         echo

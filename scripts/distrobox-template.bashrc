@@ -9,6 +9,12 @@ source $(dirname $BASH_SOURCE)/../scripts/default-ubuntu.bashrc
 # Unity Engine won't work well within a Docker container, so we use host-spawn to run it on the host.
 distrobox-host-exec --yes cat /dev/null
 
+# Add Visual Studio Code executable to /usr/local/bin.
+# This allows using 'code' command from within the Distrobox.
+sudo sh -c 'echo "#!/bin/bash
+distrobox-host-exec code \"\$@\"" > /usr/local/bin/code'
+sudo chmod +x /usr/local/bin/code
+
 # Fix-up variables passed from the host.
 # Distrobox inherits all environment variables from the host and that can cause many issues.
 #
