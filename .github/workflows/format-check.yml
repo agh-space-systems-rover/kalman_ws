@@ -1,0 +1,77 @@
+name: Format Check
+
+on:
+  workflow_call:
+    inputs:
+      paths:
+        description: "Paths to pass to the format checker"
+        required: false
+        type: string
+        default: "."
+      tooling_repo:
+        description: "Repository that provides scripts/format.sh"
+        required: false
+        type: string
+        default: "agh-space-systems-rover/kalman_ws"
+      tooling_ref:
+        description: "Ref (branch, tag, or SHA) for tooling_repo"
+        required: false
+        type: string
+        default: "ci/format-check-workflow/v1"
+      caller_ref:
+        type: string
+        required: false
+      caller_sha:
+        type: string
+        required: false
+
+jobs:
+  format-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.caller_sha || inputs.caller_ref }}
+
+      - name: Checkout formatting tools
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.tooling_repo }}
+          ref: ${{ inputs.tooling_ref }}
+          path: .ci-tools
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.14"
+
+      - name: Set up Python
+        run: uv --project .ci-tools/scripts/format-tools python install
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates wget
+          sudo wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          sudo chmod +x /tmp/llvm.sh
+          sudo /tmp/llvm.sh 20
+          sudo apt-get install -y --no-install-recommends clang-format-20
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-20 100
+          sudo update-alternatives --set clang-format /usr/bin/clang-format-20
+          clang-format --version
+
+      - name: Install Python formatting tools
+        run: uv --project .ci-tools/scripts/format-tools sync --locked
+
+      - name: Make format script executable
+        run: chmod +x .ci-tools/scripts/format.sh
+
+      - name: Run format check
+        run: .ci-tools/scripts/format.sh check "${{ github.workspace }}"

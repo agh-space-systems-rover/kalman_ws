@@ -4,7 +4,7 @@
 build() {
     local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
-    
+
     # Select packages to build.
     # If no arguments are provided, build all packages.
     local pkg_names=""
@@ -32,7 +32,7 @@ build() {
             echo '  -' $pkg
         done
     fi
-    
+
     # Install rosdep dependencies.
     mkdir -p $HOME/.cache/kalman_ws
     local can_skip_rosdep_json=$(python3 $_KALMAN_WS_ROOT/scripts/can_skip_install.py --marker-file=rosdep_mod_times.json --trigger-file=package.xml $pkg_paths)
@@ -188,63 +188,22 @@ format() {
     local prev_dir=$(pwd)
     cd $_KALMAN_WS_ROOT
 
-    # Add Python binaries to the PATH if they are not already there.
-    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-        export PATH=$HOME/.local/bin:$PATH
+    local mode="check"
+    if [ $# -ne 0 ]; then
+        mode="$1"
     fi
 
-    # Ensure that clang-format and black are installed from PyPI.
-    # Use PIP to check for that because clang-format could have been installed from APT.
-    local pkgs=$(pip3 freeze)
-    if ! echo $pkgs | grep -q ' clang-format=='; then
-        echo "Installing clang-format..."
-        pip3 install --user clang-format
+    # Prefer the repository script which centralizes formatting logic.
+    if [ -x "$_KALMAN_WS_ROOT/scripts/format.sh" ]; then
+        "$_KALMAN_WS_ROOT/scripts/format.sh" "$mode"
+        local status=$?
+        cd $prev_dir
+        return $status
+    else
+        echo "scripts/format.sh not found or not executable."
+        cd $prev_dir
+        return 1
     fi
-    if ! echo $pkgs | grep -q ' black=='; then
-        echo "Installing black..."
-        pip3 install --user black
-    fi
-
-    # Find Python files to format and run black on them.
-    local python_files=$(find src/kalman_robot/kalman_* -name '*.py')
-    if [ ! -z "$python_files" ]; then
-        echo "Formatting Python files:"
-        black $python_files
-        echo
-    fi
-
-    # Run npm format in kalman_gs
-    if [ -d "src/kalman_robot/kalman_gs/node_project" ]; then
-        echo "Formatting kalman_gs..."
-        npm --prefix src/kalman_robot/kalman_gs/node_project run format
-        echo
-    fi
-
-    # Find C++ files to format and run clang-format on them.
-	local cpp_files=$(find src/kalman_robot/kalman_* -name '*.cpp' -o -name '*.hpp' -o -name '*.c' -o -name '*.h')
-    if [ ! -z "$cpp_files" ]; then
-        echo "Formatting C++ files:"
-        for file in $cpp_files; do
-            # Check if any upper directory contains an AMENT_IGNORE or COLCON_IGNORE file.
-            # If it does, skip the file.
-            local dir=$(dirname "$file")
-            while [ "$dir" != "." ] && [ "$dir" != "/" ]; do
-                if [ -e "$dir/AMENT_IGNORE" ] || [ -e "$dir/COLCON_IGNORE" ]; then
-                    continue 2
-                fi
-                local dir=$(dirname "$dir")
-            done
-            local rel_path=${file#src/kalman_robot/}
-			local pkg_name=${rel_path%%/*}
-            local file_name=$(basename $file)
-            echo "Formatting $pkg_name/.../$file_name..."
-            clang-format -i $file
-        done
-        echo
-    fi
-
-    echo "Done."
-    cd $prev_dir
 }
 
 # Runs Colcon tests and linters in the workspace.

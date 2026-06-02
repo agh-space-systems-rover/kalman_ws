@@ -3,7 +3,6 @@ import os
 from xml.etree import ElementTree
 from typing import Callable
 
-
 MAX_DEPTH = 7
 PACKAGES_DIR = "src"
 
