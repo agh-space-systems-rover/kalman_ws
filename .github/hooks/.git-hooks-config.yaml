@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: docker-container-build
         name: "[1/4] Docker Container Build"
-        entry: docker compose -f .github/scripts/docker-compose.yaml build format
+        entry: docker compose -f .github/scripts/format/docker-compose.yaml build format
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -11,7 +11,7 @@ repos:
 
       - id: docker-black-check
         name: "[2/4] Python Formatting Check"
-        entry: docker compose -f .github/scripts/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-python
+        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-python
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -19,7 +19,7 @@ repos:
 
       - id: docker-clang-check
         name: "[3/4] C/C++ Formatting Check"
-        entry: docker compose -f .github/scripts/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-cpp
+        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-cpp
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -27,7 +27,7 @@ repos:
 
       - id: docker-prettier-check
         name: "[4/4] Frontend Formatting Check"
-        entry: docker compose -f .github/scripts/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-frontend
+        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-frontend
         language: system
         pass_filenames: false
         stages: [pre-push]

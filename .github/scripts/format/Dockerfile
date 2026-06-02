@@ -31,7 +31,7 @@ RUN sh /uv-installer.sh && rm /uv-installer.sh
 
 ENV PATH="/usr/local/bin:$PATH"
 
-COPY .github/scripts/format-tools /usr/local/bin/format-tools
+COPY .github/scripts/format/format-tools /usr/local/bin/format-tools
 
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
 
