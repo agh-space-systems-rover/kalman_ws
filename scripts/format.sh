@@ -2,16 +2,56 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 <check|apply>"
+  echo "Usage: $0 <check|apply> [project_root] [--only-python] [--only-cpp] [--only-frontend]"
   exit 2
 }
 
-mode=${1:-check}
+# Default operational configurations
+mode="check"
+project_root="."
+run_all=true
+only_python=false
+only_cpp=false
+only_frontend=false
+
+# Simple argument parser loop to handle dynamic flags and positions
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    check|apply)
+      mode="$1"
+      shift
+      ;;
+    --only-python)
+      only_python=true
+      run_all=false
+      shift
+      ;;
+    --only-cpp)
+      only_cpp=true
+      run_all=false
+      shift
+      ;;
+    --only-frontend)
+      only_frontend=true
+      run_all=false
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      usage
+      ;;
+    *)
+      project_root="$1"
+      shift
+      ;;
+  esac
+done
+
+# If an invalid tool mode was passed implicitly or parsing came up blank
 if [[ "$mode" != "check" && "$mode" != "apply" ]]; then
   usage
 fi
 
-project_root=${2:-.}
 cd "$project_root" || exit 1
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,7 +63,6 @@ exclude_regex='vendor/|kalman_hardware/compasscal_src/'
 failures=0
 
 # Gather files tracked by git or untracked (not ignored) from all nested git repositories.
-# Prints null-separated paths relative to repository root (prefixed with subrepo path when applicable).
 gather_git_files() {
   local -a pathspecs=("$@")
   local -a repo_dirs=()
@@ -165,9 +204,18 @@ run_prettier_frontend() {
   fi
 }
 
-run_black
-run_clang_format
-run_prettier_frontend
+# Dispatch steps depending on options flagged by the user
+if [ "$run_all" = true ] || [ "$only_python" = true ]; then
+  run_black
+fi
+
+if [ "$run_all" = true ] || [ "$only_cpp" = true ]; then
+  run_clang_format
+fi
+
+if [ "$run_all" = true ] || [ "$only_frontend" = true ]; then
+  run_prettier_frontend
+fi
 
 if [ ${failures:-0} -gt 0 ]; then
   echo "Formatting check failed ($failures)." >&2

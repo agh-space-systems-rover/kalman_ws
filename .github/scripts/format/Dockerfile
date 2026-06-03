@@ -2,8 +2,6 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV UV_VERSION=0.11.14
-ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
-ENV UV_DOWNLOAD_URL=https://releases.astral.sh/github/uv/releases/download/${UV_VERSION}
 
 # Install system dependencies, Node.js 18, and clang-format 20
 RUN apt-get update \
@@ -25,16 +23,18 @@ RUN apt-get update \
   && update-alternatives --set clang-format /usr/bin/clang-format-20 \
   && rm -rf /var/lib/apt/lists/* /tmp/llvm.sh
 
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- \
-  && /root/.local/bin/uv --version \
-  && cp /root/.local/bin/uv /usr/local/bin/uv
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
 
-# Ensure the installed binary is on the PATH
-ENV PATH="/root/.local/bin:$PATH"
+ENV UV_INSTALL_DIR=/usr/local/bin
 
-# Python formatter tooling via uv
-COPY scripts/format-tools /usr/local/bin/format-tools
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+ENV PATH="/usr/local/bin:$PATH"
+
+COPY .github/scripts/format/format-tools /usr/local/bin/format-tools
+
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
+
 RUN uv --project /usr/local/bin/format-tools python install \
   && uv --project /usr/local/bin/format-tools sync --locked \
   && chmod -R a+rwX /usr/local/bin/format-tools \

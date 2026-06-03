@@ -28,16 +28,16 @@ Quick local checks
 
 Quick checks in Docker
 
-- Build and run the formatter without an interactive shell (uses scripts/docker-compose.yaml):
+- Build and run the formatter without an interactive shell (uses .github/scripts/format/docker-compose.yaml):
 
 ```bash
-docker compose -f scripts/docker-compose.yaml run --rm --entrypoint format.sh format check .
+docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check .
 ```
 
 - Apply formatting in Docker:
 
 ```bash
-docker compose -f scripts/docker-compose.yaml run --rm --entrypoint format.sh format apply .
+docker compose -f .github/scripts/format/docker-compose.yaml run --rm --entrypoint format.sh format apply .
 ```
 
 - Apply formatting locally:
@@ -46,10 +46,24 @@ docker compose -f scripts/docker-compose.yaml run --rm --entrypoint format.sh fo
 ./scripts/format.sh apply .
 ```
 
-- Run frontend prettier only (check):
+- Language specific checks:
+
+**Python**
 
 ```bash
-./scripts/format-prettier-frontend.sh check
+docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-python
+```
+
+**C/C++**
+
+```bash
+docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-cpp
+```
+
+**frontend**
+
+```bash
+docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-frontend
 ```
 
 Notes
@@ -60,26 +74,13 @@ Notes
 CI
 
 A GitHub Actions workflow `.github/workflows/format-check.yml` runs on PRs and performs the following checks:
-- `black` via `pre-commit`
+- `black`
 - `clang-format` checks (fails if diffs present)
 - `prettier` check for the frontend (if present)
 
 Macro integration
 
-- If you use `scripts/macros.bash`, add a `format` macro that runs the repo wrapper:
-
-```bash
-format() {
-  scripts/format.sh "$1"
-}
-```
-
-Baseline commit
-
-- To create the baseline formatting commit:
-  1. Run `./scripts/format.sh apply` locally.
-  2. Review changes (`git status`, `git diff`).
-  3. Commit and push from a maintainer account.
+- If you use `scripts/macros.bash`, add a `format` macro:
 
 Troubleshooting
 
