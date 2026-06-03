@@ -15,21 +15,47 @@ If you wish to develop natively on your Ubuntu Jammy:
 ## Getting Started
 
 Firstly clone the repository on your machine:
+
 ```bash
 git clone --recurse-submodules git@github.com:agh-space-systems-rover/kalman_ws.git
+
 ```
 
 If you have already cloned without `--recurse-submodules`, use:
+
 ```bash
 git submodule update --init --recursive
+
 ```
+
+### Setting up Git Hooks
+
+This repository utilizes pre-push hooks to ensure code compliance (formatting checks) before code reaches the remote server. You can install these hooks locally using `uvx` without needing to install the `pre-commit` package permanently on your global system:
+
+```bash
+uvx pre-commit install --hook-type pre-push --config .github/hooks/.git-hooks-config.yaml --overwrite
+
+```
+
+To test this hook without pushing, you can use following command:
+
+```bash
+uvx pre-commit run --all-files --hook-stage pre-push --config .github/hooks/.git-hooks-config.yaml --verbose
+```
+
+> [!NOTE]
+>
+> The hooks use configuration file `.git-hooks-config.yaml` and will intercept any `git push` commands to validate code formatting. Refer to `docs/FORMAT.md` for a comprehensive guide on formatting parameters.
 
 ### Containerized Development
 
 To enter the ROS 2 shell, run this automated script:
+
 ```bash
 ./scripts/distrobox
+
 ```
+
 A new distrobox will be created and you will be logged in automatically.
 
 After the initial setup of your container is done, you will be able to use ROS 2 and graphical tools such as Rviz and Rqt.
@@ -56,6 +82,7 @@ build
 ```
 
 > [!IMPORTANT]
+>
 > Selective builds are supported via `build meta_gs`, `build meta_pc`, `build meta_arm`, etc.
 
 Running this command will install all rosdeps, custom APT/PIP dependencies, build the workspace, source it, and configure Visual Studio Code for you.
