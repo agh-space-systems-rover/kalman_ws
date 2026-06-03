@@ -14,7 +14,15 @@ repos:
 
       - id: docker-black-check
         name: "[2/4] Python Formatting Check"
-        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-python
+        entry: |
+          bash -c '
+          docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-python || (
+              echo -e "\n❌ Black check failed.\n"
+              echo -e "Please run formatting locally to fix issues:\n"
+              echo -e "docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format apply .\n"
+              exit 1
+          )
+          '
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -22,7 +30,15 @@ repos:
 
       - id: docker-clang-check
         name: "[3/4] C/C++ Formatting Check"
-        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-cpp
+        entry: |
+          bash -c '
+          docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-cpp || (
+              echo -e "\n❌ Clang-format check failed.\n"
+              echo -e "Please run formatting locally to fix issues:\n"
+              echo -e "docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format apply .\n"
+              exit 1
+          )
+          '
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -30,7 +46,23 @@ repos:
 
       - id: docker-prettier-check
         name: "[4/4] Frontend Formatting Check"
-        entry: docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-frontend
+        entry: |
+          bash -c '
+          docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format check . --only-frontend || (
+              echo -e "\n❌ Prettier check failed.\n"
+              echo -e "Please run formatting locally to fix issues:\n"
+              echo -e "docker compose -f .github/scripts/format/docker-compose.yaml run -T --rm --remove-orphans --entrypoint format.sh format apply .\n"
+              exit 1
+          )
+          '
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+        verbose: true
+
+      - id: success-message
+        name: "Success Message"
+        entry: echo '✅ SUCCESS - All checks passed.'
         language: system
         pass_filenames: false
         stages: [pre-push]
