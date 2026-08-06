@@ -118,8 +118,8 @@ build() {
         return
     fi
 
-    # Load .vscode/settings.json.
-    echo "Updating Visual Studio Code settings..."
+    # Update VS Code settings and shared Pyright language-server paths.
+    echo "Updating editor Python paths..."
     python3 $_KALMAN_WS_ROOT/scripts/configure_vscode.py
 
     # Source setup scripts.

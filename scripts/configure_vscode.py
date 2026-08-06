@@ -1,4 +1,4 @@
-# Configure auto-complete, code analysis and terminal for VS Code.
+# Configure VS Code and editor-agnostic Python language-server paths.
 
 # TODO: Add ~/.local/**/site-packages to VSCode paths
 
@@ -38,6 +38,7 @@ def elem(arr, index, default=None):
 
 ws_dir = os.path.normpath(os.path.dirname(__file__) + "/..")
 config_path = os.path.join(ws_dir, ".vscode/settings.json")
+pyrightconfig_local_path = os.path.join(ws_dir, "pyrightconfig.local.json")
 compile_commands_path = os.path.join(ws_dir, "build/compile_commands.json")
 
 site_dir = os.path.expanduser("~/.vscode-paths/ros2-site-packages")
@@ -177,7 +178,13 @@ if "files.associations" not in config:
     config["files.associations"] = {}
 config["files.associations"]["*.yaml.j2"] = "yaml"
 
-# Save the configuration file.
+# Save the configuration files.
 os.makedirs(os.path.dirname(config_path), exist_ok=True)
 with open(config_path, "w") as f:
     json.dump(config, f, indent=4)
+
+# The tracked pyrightconfig.json extends this local file, so Pyright,
+# basedpyright (Zed's default Python language server), and Pylance receive the
+# generated machine-specific paths.
+with open(pyrightconfig_local_path, "w") as f:
+    json.dump({"extraPaths": config["python.analysis.extraPaths"]}, f, indent=4)
