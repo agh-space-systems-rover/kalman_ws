@@ -4,9 +4,11 @@ __pycache__
 /.distrobox*
 .distrobox*
 
-# Visual Studio Code configuration
+# Editor configuration
 /.vscode
 .vscode
+/pyrightconfig.local.json
+pyrightconfig.local.json
 /.cache
 .cache
 

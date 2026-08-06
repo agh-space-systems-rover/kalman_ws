@@ -76,7 +76,7 @@ In this alternate configuration Visual Studio Code's terminal profile will be co
 
 ## Custom Macros
 
-- `build` - Pull from rosdep and build the workspace, then source its setup script. Additionally, Visual Studio Code is automatically configured for ease of use.
+- `build` - Pull from rosdep and build the workspace, then source its setup script. Additionally, Visual Studio Code settings and shared Pyright language-server import paths are automatically configured. Shared Pyright options belong in tracked `pyrightconfig.json`; generated machine-specific paths are in ignored `pyrightconfig.local.json`.
 - `clean` - Remove build artifacts from the workspace.
 - `format` - Run `clang-format` and `black` on all packages in the workspace.
 
@@ -96,7 +96,7 @@ See: [macros.bash](/scripts/macros.bash)
 ├─ log/                   # ROS 2 runtime artifacts (ignored)
 ├─ scripts/               # The implementation of the workspace
 │  ├─ .bashrc             # Kalman dev env Bash overlay; Can be sourced both from Distrobox or from a standalone system.
-│  ├─ configure_vscode.py # Visual Studio auto-complete configuration script; called from macros.bash
+│  ├─ configure_vscode.py # VS Code and shared Pyright path configuration script; called from macros.bash
 │  ├─ Dockerfile          # ROS 2 (Desktop) image recipe; Does not assume Distrobox.
 │  ├─ distrobox           # Distrobox launch script
 │  └─ macros.bash         # Implements useful development macros; included by .bashrc
