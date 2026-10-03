@@ -1,0 +1,34 @@
+services:
+  kalman_arm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kalman_arm
+    restart: unless-stopped
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    privileged: true
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        
+    devices:
+      # UART
+      - "/dev/ttyAMA0:/dev/ttyAMA2"
+
+    volumes:
+      - .:/ws
+      - /dev:/dev
+
+    environment:
+      - ROS_DOMAIN_ID=0
+      - ROS_LOCALHOST_ONLY=1
+      - PYTHONUNBUFFERED=1
+      - RCUTILS_LOGGING_USE_STDOUT=1
+      
+    command: ros2 launch kalman_arm arm.launch.py
