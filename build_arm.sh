@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+if [ -z "$ROS_DISTRO" ] && [ -f /opt/ros/jazzy/setup.bash ]; then
+  source /opt/ros/jazzy/setup.bash
+fi
+
 colcon build --symlink-install \
   --parallel-workers 2 \
   --packages-up-to \
@@ -16,3 +20,6 @@ colcon build --symlink-install \
     bio_ik \
     joy_linux \
 
+if [ -f install/setup.bash ]; then
+  source install/setup.bash
+fi
